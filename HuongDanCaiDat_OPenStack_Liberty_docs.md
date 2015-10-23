@@ -13,14 +13,14 @@
 apt-get update -y && apt-get upgrade -y && apt-get dist-upgrade -y && init 6
 `
 
-#### Node Controller
+#### Node 10.10.10.164
 ##### Thiết lập IP, hostname
 
 
-- Thiết lập hostname với tên là `controller` 
+- Thiết lập hostname với tên là `10.10.10.164` 
 
 ```sh 
-echo "controller" > /etc/hostname
+echo "10.10.10.164" > /etc/hostname
 hostname -F /etc/hostname
 ```
 
@@ -64,8 +64,8 @@ Cấu hình file /etc/hosts để phân giản IP cho các node
 
 ```sh
 cat << EOF > /etc/hosts 
-127.0.0.1   controller
-10.10.10.164    controller
+127.0.0.1   10.10.10.164
+10.10.10.164    10.10.10.164
 10.10.10.165    compute1
 10.10.10.166    compute2
 10.10.10.167    cinder
@@ -74,7 +74,7 @@ cat << EOF > /etc/hosts
 EOF
 
 ```
-Khởi động lại node Controller
+Khởi động lại node 10.10.10.164
 
 `
 int 6
@@ -101,7 +101,7 @@ Sửa file ` /etc/chrony/chrony.conf` với lệnh sed
 sed -i 's/server 0.debian.pool.ntp.org offline minpoll 8/#server 3.debian.pool.ntp.org offline minpoll 8/g' /etc/chrony/chrony.conf 
 sed -i 's/server 1.debian.pool.ntp.org offline minpoll 8/#server 1.debian.pool.ntp.org offline minpoll 8/g' /etc/chrony/chrony.conf 
 sed -i 's/server 2.debian.pool.ntp.org offline minpoll 8/#server 2.debian.pool.ntp.org offline minpoll 8/g' /etc/chrony/chrony.conf 
-sed -i 's/server 3.debian.pool.ntp.org offline minpoll 8/server controller iburst/g' /etc/chrony/chrony.conf 
+sed -i 's/server 3.debian.pool.ntp.org offline minpoll 8/server 10.10.10.164 iburst/g' /etc/chrony/chrony.conf 
 ```
 
 Khởi động lại NTP
@@ -258,34 +258,118 @@ Tạo file `/etc/apache2/sites-available/wsgi-keystone.conf` với nội dung sa
 cat << EOF > /etc/apache2/sites-available/wsgi-keystone.conf
 Listen 5000
 Listen 35357
- 
+
 <VirtualHost *:5000>
-    WSGIDaemonProcess keystone-public processes=5 threads=1 user=keystone display-name=%{GROUP}
+    WSGIDaemonProcess keystone-public processes=5 threads=1 user=keystone group=keystone display-name=%{GROUP}
     WSGIProcessGroup keystone-public
-    WSGIScriptAlias / /var/www/cgi-bin/keystone/main
+    WSGIScriptAlias / /usr/bin/keystone-wsgi-public
     WSGIApplicationGroup %{GLOBAL}
     WSGIPassAuthorization On
     <IfVersion >= 2.4>
       ErrorLogFormat "%{cu}t %M"
     </IfVersion>
-    LogLevel info
-    ErrorLog /var/log/apache2/keystone-error.log
-    CustomLog /var/log/apache2/keystone-access.log combined
+    ErrorLog /var/log/apache2/keystone.log
+    CustomLog /var/log/apache2/keystone_access.log combined
+
+    <Directory /usr/bin>
+        <IfVersion >= 2.4>
+            Require all granted
+        </IfVersion>
+        <IfVersion < 2.4>
+            Order allow,deny
+            Allow from all
+        </IfVersion>
+    </Directory>
 </VirtualHost>
- 
+
 <VirtualHost *:35357>
-    WSGIDaemonProcess keystone-admin processes=5 threads=1 user=keystone display-name=%{GROUP}
+    WSGIDaemonProcess keystone-admin processes=5 threads=1 user=keystone group=keystone display-name=%{GROUP}
     WSGIProcessGroup keystone-admin
-    WSGIScriptAlias / /var/www/cgi-bin/keystone/admin
+    WSGIScriptAlias / /usr/bin/keystone-wsgi-admin
     WSGIApplicationGroup %{GLOBAL}
     WSGIPassAuthorization On
     <IfVersion >= 2.4>
       ErrorLogFormat "%{cu}t %M"
     </IfVersion>
-    LogLevel info
-    ErrorLog /var/log/apache2/keystone-error.log
-    CustomLog /var/log/apache2/keystone-access.log combined
+    ErrorLog /var/log/apache2/keystone.log
+    CustomLog /var/log/apache2/keystone_access.log combined
+
+    <Directory /usr/bin>
+        <IfVersion >= 2.4>
+            Require all granted
+        </IfVersion>
+        <IfVersion < 2.4>
+            Order allow,deny
+            Allow from all
+        </IfVersion>
+    </Directory>
 </VirtualHost>
  
 EOF
 ```
+
+Cấu hình virtual host cho keystone
+
+```sh 
+ln -s /etc/apache2/sites-available/wsgi-keystone.conf /etc/apache2/sites-enabled
+```
+
+Khởi động lại apache
+
+```sh
+service apache2 restart
+```
+
+Xóa SQLite mặc định của keystone
+
+```sh
+rm -f /var/lib/keystone/keystone.db
+```
+
+Tạo endpoint 
+
+```sh
+export OS_TOKEN=Welcome123
+export OS_URL=http://10.10.10.164:35357/v3
+export OS_IDENTITY_API_VERSION=3
+```
+
+Tạo service cho Keystone
+
+```sh
+openstack service create --name keystone --description "OpenStack Identity" identity
+```
+
+Tạo các endpoine cho keystone
+
+```sh
+openstack endpoint create --region RegionOne identity public http://10.10.10.164:5000/v2.0
+
+openstack endpoint create --region RegionOne identity internal http://10.10.10.164:5000/v2.0
+
+openstack endpoint create --region RegionOne identity admin http://10.10.10.164:35357/v2.0
+```
+
+Tạo project, user và role
+
+- Tạo project `admin`
+
+```sh
+openstack project create --domain default --description "Admin Project" admin
+```
+  
+- Tạo tài khoản admin
+
+```sh
+openstack user create  --domain default --password Welcome123 admin
+```
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
