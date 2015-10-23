@@ -64,14 +64,13 @@ Cấu hình file /etc/hosts để phân giản IP cho các node
 
 ```sh
 cat << EOF > /etc/hosts 
-
+127.0.0.1   controller
 10.10.10.164    controller
 10.10.10.165    compute1
 10.10.10.166    compute2
 10.10.10.167    cinder
 10.10.10.169    swift1
 10.10.10.170    swift2
-
 EOF
 
 ```
@@ -131,6 +130,48 @@ apt-get -y install python-openstackclient
 
 #### Cài đặt My SQL
 
+Trong quá trình cài đặt yêu cầu nhập mật khẩu My SQL, sử dụng mật khẩu Welcome123 để thống nhất.
+
 ```sh
 apt-get -y install mariadb-server python-pymysql
 ```
+
+
+Tạo file với nội dung sau
+
+```sh
+cat << EOF  /etc/mysql/conf.d/mysqld_openstack.cnf
+
+[mysqld]
+bind-address = 10.10.10.164
+
+[mysqld]
+default-storage-engine = innodb
+innodb_file_per_table
+collation-server = utf8_general_ci
+init-connect = 'SET NAMES utf8'
+character-set-server = utf8
+EOF
+
+``` 
+
+#### Cài đặt Message queue
+
+Cài đặt gói rabbitmq
+
+```sh
+apt-get -y install rabbitmq-server
+```
+
+Tạo tài khoản `openstack` cho rabbitmq
+
+```sh 
+rabbitmqctl add_user openstack Welecome123
+```
+
+Cấp quyền cho tài khoản openstack 
+
+```sh
+rabbitmqctl set_permissions openstack ".*" ".*" ".*"
+```
+
