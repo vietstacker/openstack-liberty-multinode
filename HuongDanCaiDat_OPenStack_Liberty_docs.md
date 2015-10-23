@@ -44,15 +44,15 @@ iface lo inet loopback
 # MGNG
 auto eth0
 iface eth0 inet static
-address 10.10.10.40
+address 10.10.10.164
 netmask 255.255.255.0
 
 #  EXT
 auto eth1
 iface eth1 inet static
-address 10.145.37.97
+address 172.16.69.164
 netmask 255.255.255.255
-gateway 10.145.37.1
+gateway 172.16.69.1
 dns-nameservers 8.8.8.8
 ```
 
