@@ -109,3 +109,28 @@ Khởi động lại NTP
 ```sh
 service chrony restart
 ```
+
+Khai báo các gói để cài đặt OpenStack Liberty
+
+```sh
+apt-get -y install software-properties-common
+add-apt-repository -y cloud-archive:liberty 
+```
+
+Update và khởi động lại sau khi khai báo repos cho OpenStack Liberty
+
+```sh
+apt-get update -y && apt-get upgrade -y && apt-get dist-upgrade -y && init 6
+```
+
+Cài đặt gói OpenStack Client
+
+```sh
+apt-get -y install python-openstackclient
+```
+
+#### Cài đặt My SQL
+
+```sh
+apt-get -y install mariadb-server python-pymysql
+```
