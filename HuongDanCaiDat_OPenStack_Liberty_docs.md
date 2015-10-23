@@ -56,9 +56,11 @@ gateway 172.16.69.1
 dns-nameservers 8.8.8.8
 
 EOF
+```
 
 Cấu hình file /etc/hosts để phân giản IP cho các node
 
+```sh
 cat << EOF >> /etc/hosts 
 10.10.10.164    controller
 10.10.10.165  	compute1
@@ -66,6 +68,8 @@ cat << EOF >> /etc/hosts
 10.10.10.167    cinder
 10.10.10.169    swift1
 10.10.10.170    swift2
+
 EOF
 
+```
 
