@@ -223,9 +223,14 @@ sed -i 's/#servers = localhost:11211/servers = localhost:11211/g' /etc/keystone/
 
 sed -i 's/#provider = uuid/provider = uuid/g' /etc/keystone/keystone.conf 
 
-sed -i 's/#driver = sql/driver = memcache/g' /etc/keystone/keystone.conf 
 
-sed -i 's/#driver = sql/driver = sql/g' /etc/keystone/keystone.conf 
+sed -e 's/\[token\]/ \
+\[token\] \
+driver = memcache/g' /etc/keystone/keystone.conf 
+
+sed -e 's/\[revoke\]/ \
+\[revoke\] \
+driver = sql/g' /etc/keystone/keystone.conf 
 
 
 sed -i 's/#verbose = true/verbose = true/g' /etc/keystone/keystone.conf 
