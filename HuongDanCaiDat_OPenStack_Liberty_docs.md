@@ -175,3 +175,66 @@ Cấp quyền cho tài khoản openstack
 rabbitmqctl set_permissions openstack ".*" ".*" ".*"
 ```
 
+#### Cài đặt dịch vụ Keystone
+
+##### Tạo database cho keystone
+
+Đăng nhập vào MariaDB
+
+```sh
+mysql -u root -pWelcome123
+```
+
+Tạo DB tên là keystone và gán quyền
+
+```sh
+CREATE DATABASE keystone;
+
+GRANT ALL PRIVILEGES ON keystone.* TO 'keystone'@'localhost' \
+IDENTIFIED BY 'Welcome123';
+
+GRANT ALL PRIVILEGES ON keystone.* TO 'keystone'@'%' \
+IDENTIFIED BY 'Welcome123';
+
+```
+
+##### Cài đặt Keystone
+
+Cấu hình không cho Keystone tự động khởi động.
+
+```sh
+echo "manual" > /etc/init/keystone.override
+```
+
+Cài đặt các gói dành cho Keystone
+
+```sh
+apt-get -y install keystone apache2 libapache2-mod-wsgi memcached python-memcache
+```
+
+Chỉnh sửa file cấu hình của keystone như dưới
+
+```sh
+sed -i 's/#admin_token = ADMIN/admin_token = Welcome123/g' /etc/keystone/keystone.conf 
+
+sed -i '/connection = .*/{s|sqlite:///.*|mysql+pymysql://'"keystone"':'Welcome123'@'10.10.10.164'/keystone|g}' /etc/keystone/keystone.conf 
+
+sed -i 's/#servers = localhost:11211/servers = localhost:11211/g' /etc/keystone/keystone.conf 
+
+sed -i 's/#provider = uuid/provider = uuid/g' /etc/keystone/keystone.conf 
+
+sed -i 's/#driver = sql/driver = memcache/g' /etc/keystone/keystone.conf 
+
+sed -i 's/#driver = sql/driver = sql/g' /etc/keystone/keystone.conf 
+
+
+sed -i 's/#verbose = true/verbose = true/g' /etc/keystone/keystone.conf 
+
+
+```
+
+Đồng bộ database cho keystone
+
+```sh
+su -s /bin/sh -c "keystone-manage db_sync" keystone
+```
