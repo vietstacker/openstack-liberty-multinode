@@ -358,18 +358,54 @@ Tạo project, user và role
 openstack project create --domain default --description "Admin Project" admin
 ```
   
-- Tạo tài khoản admin
+- Tạo tài khoản `admin`
 
 ```sh
 openstack user create  --domain default --password Welcome123 admin
 ```
   
   
+- Tạo role `admin`
+
+```sh
+openstack role create admin
+```
+
+- Gán role `admin` cho tài khoản `admin `
+
+```sh
+openstack role add --project admin --user admin admin
+```
+
+
+- Tạo service tên là `serivce`
+
+```sh
+openstack project create --domain default --description "Service Project" service
+```
   
+- Tạo project tên là `demo`
+
+```sh
+openstack project create --domain default --description "Demo Project" demo
+``` 
   
+- Tạo user tên là `demo`
+
+```sh
+openstack user create --domain default --password Welcome123 demo
+```
   
-  
-  
-  
-  
-  
+- Tạo role tên là `user`
+
+```sh
+openstack role create user
+```
+
+- Gán tài khoản `demo` có role là `user`
+
+```sh
+openstack role add --project demo --user demo user
+```
+
+
