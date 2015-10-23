@@ -224,11 +224,11 @@ sed -i 's/#servers = localhost:11211/servers = localhost:11211/g' /etc/keystone/
 sed -i 's/#provider = uuid/provider = uuid/g' /etc/keystone/keystone.conf 
 
 
-sed -e 's/\[token\]/ \
+sed -i 's/\[token\]/ \
 \[token\] \
 driver = memcache/g' /etc/keystone/keystone.conf 
 
-sed -e 's/\[revoke\]/ \
+sed -i 's/\[revoke\]/ \
 \[revoke\] \
 driver = sql/g' /etc/keystone/keystone.conf 
 
@@ -242,4 +242,50 @@ sed -i 's/#verbose = true/verbose = true/g' /etc/keystone/keystone.conf
 
 ```sh
 su -s /bin/sh -c "keystone-manage db_sync" keystone
+```
+
+Cấu hình apache cho Keystone
+
+```sh
+echo "ServerName 10.10.10.164" > /etc/apache2/conf-available/servername.conf
+sudo a2enconf servername
+```
+
+Tạo file `/etc/apache2/sites-available/wsgi-keystone.conf` với nội dung sau
+
+
+```sh
+cat << EOF > /etc/apache2/sites-available/wsgi-keystone.conf
+Listen 5000
+Listen 35357
+ 
+<VirtualHost *:5000>
+    WSGIDaemonProcess keystone-public processes=5 threads=1 user=keystone display-name=%{GROUP}
+    WSGIProcessGroup keystone-public
+    WSGIScriptAlias / /var/www/cgi-bin/keystone/main
+    WSGIApplicationGroup %{GLOBAL}
+    WSGIPassAuthorization On
+    <IfVersion >= 2.4>
+      ErrorLogFormat "%{cu}t %M"
+    </IfVersion>
+    LogLevel info
+    ErrorLog /var/log/apache2/keystone-error.log
+    CustomLog /var/log/apache2/keystone-access.log combined
+</VirtualHost>
+ 
+<VirtualHost *:35357>
+    WSGIDaemonProcess keystone-admin processes=5 threads=1 user=keystone display-name=%{GROUP}
+    WSGIProcessGroup keystone-admin
+    WSGIScriptAlias / /var/www/cgi-bin/keystone/admin
+    WSGIApplicationGroup %{GLOBAL}
+    WSGIPassAuthorization On
+    <IfVersion >= 2.4>
+      ErrorLogFormat "%{cu}t %M"
+    </IfVersion>
+    LogLevel info
+    ErrorLog /var/log/apache2/keystone-error.log
+    CustomLog /var/log/apache2/keystone-access.log combined
+</VirtualHost>
+ 
+EOF
 ```
