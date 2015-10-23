@@ -103,7 +103,7 @@ sed -i 's/server 0.debian.pool.ntp.org offline minpoll 8/#server 3.debian.pool.n
 sed -i 's/server 1.debian.pool.ntp.org offline minpoll 8/#server 1.debian.pool.ntp.org offline minpoll 8/g' /etc/chrony/chrony.conf 
 sed -i 's/server 2.debian.pool.ntp.org offline minpoll 8/#server 2.debian.pool.ntp.org offline minpoll 8/g' /etc/chrony/chrony.conf 
 sed -i 's/server 3.debian.pool.ntp.org offline minpoll 8/server controller iburst/g' /etc/chrony/chrony.conf 
-`
+```
 
 Khởi động lại NTP
 ```sh
