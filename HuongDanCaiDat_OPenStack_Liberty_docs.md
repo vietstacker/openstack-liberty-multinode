@@ -51,11 +51,13 @@ netmask 255.255.255.0
 auto eth1
 iface eth1 inet static
 address 172.16.69.164
-netmask 255.255.255.255
+netmask 255.255.255.0
 gateway 172.16.69.1
 dns-nameservers 8.8.8.8
 
+
 EOF
+
 ```
 
 Cấu hình file /etc/hosts để phân giản IP cho các node
