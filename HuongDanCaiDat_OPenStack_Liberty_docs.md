@@ -81,3 +81,31 @@ Khởi động lại node Controller
 int 6
 `
 
+### Cài đăt các gói phần mềm
+#### Cài đặt gói NTP
+
+Cài đăt gói dưới
+
+`
+apt-get -y install chrony
+`
+
+Sao lưu file /etc/chrony/chrony.conf 
+
+`
+cp /etc/chrony/chrony.conf  /etc/chrony/chrony.conf.ba
+`
+
+Sửa file ` /etc/chrony/chrony.conf` với lệnh sed
+
+```sh
+sed -i 's/server 0.debian.pool.ntp.org offline minpoll 8/#server 3.debian.pool.ntp.org offline minpoll 8/g' /etc/chrony/chrony.conf 
+sed -i 's/server 1.debian.pool.ntp.org offline minpoll 8/#server 1.debian.pool.ntp.org offline minpoll 8/g' /etc/chrony/chrony.conf 
+sed -i 's/server 2.debian.pool.ntp.org offline minpoll 8/#server 2.debian.pool.ntp.org offline minpoll 8/g' /etc/chrony/chrony.conf 
+sed -i 's/server 3.debian.pool.ntp.org offline minpoll 8/server controller iburst/g' /etc/chrony/chrony.conf 
+`
+
+Khởi động lại NTP
+```sh
+service chrony restart
+```
