@@ -16,8 +16,8 @@ apt-get update -y && apt-get upgrade -y && apt-get dist-upgrade -y && init 6
 
 - Thiết lập hostname với tên là `controller` 
 
-`sh 
+```sh 
 echo "controller" > /etc/hostname
 hostname -F /etc/hostname
-`
+```
 
