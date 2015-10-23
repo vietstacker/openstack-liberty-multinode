@@ -25,35 +25,47 @@ hostname -F /etc/hostname
 ```
 
 Thiết lập địa chỉ IP
-- Mở file `/etc/network/interfaces` sửa với nội dung dưới.
+
+- Sao lưu file cấu hình của card mạng
 
 `
-vi /etc/network/interfaces
+cp /etc/network/interfaces /etc/network/interfaces.bak
 `
 
-- Nội dung như sau
+- Sử dụng script dưới để cấu hình IP tĩnh cho card mạng.
 
 ```sh
-# This file describes the network interfaces available on your system
-# and how to activate them. For more information, see interfaces(5).
+cat << EOF >> /etc/network/interfaces
 
-# The loopback network interface
+# NIC loopback
 auto lo
 iface lo inet loopback
 
-# MGNG
+# NIC MGNG
 auto eth0
 iface eth0 inet static
 address 10.10.10.164
 netmask 255.255.255.0
 
-#  EXT
+# NIC EXTERNAL
 auto eth1
 iface eth1 inet static
 address 172.16.69.164
 netmask 255.255.255.255
 gateway 172.16.69.1
 dns-nameservers 8.8.8.8
-```
+
+EOF
+
+Cấu hình file /etc/hosts để phân giản IP cho các node
+
+cat << EOF >> /etc/hosts 
+10.10.10.164    controller
+10.10.10.165  	compute1
+10.10.10.166 	  compute2
+10.10.10.167    cinder
+10.10.10.169    swift1
+10.10.10.170    swift2
+EOF
 
 
