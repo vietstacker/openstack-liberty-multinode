@@ -35,7 +35,7 @@ cp /etc/network/interfaces /etc/network/interfaces.bak
 - Sử dụng script dưới để cấu hình IP tĩnh cho card mạng.
 
 ```sh
-cat << EOF >> /etc/network/interfaces
+cat << EOF > /etc/network/interfaces
 
 # NIC loopback
 auto lo
@@ -61,10 +61,11 @@ EOF
 Cấu hình file /etc/hosts để phân giản IP cho các node
 
 ```sh
-cat << EOF >> /etc/hosts 
+cat << EOF > /etc/hosts 
+
 10.10.10.164    controller
-10.10.10.165  	compute1
-10.10.10.166 	  compute2
+10.10.10.165    compute1
+10.10.10.166    compute2
 10.10.10.167    cinder
 10.10.10.169    swift1
 10.10.10.170    swift2
@@ -72,4 +73,9 @@ cat << EOF >> /etc/hosts
 EOF
 
 ```
+Khởi động lại node Controller
+
+`
+int 6
+`
 
