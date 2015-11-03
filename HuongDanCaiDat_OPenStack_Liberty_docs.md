@@ -9,15 +9,18 @@
 - Chạy các lệnh dưới ngay sau khi cài đặt xong máy ảo.
 - Mô hình phải đảm bảo cấu hình đúng dải IP ở trên.
 
-`
-apt-get update -y && apt-get upgrade -y && apt-get dist-upgrade -y && init 6
-`
+Khai báo các gói để cài đặt OpenStack Liberty
 
-#### Node 10.10.10.164
+```sh
+apt-get -y install software-properties-common
+add-apt-repository -y cloud-archive:liberty 
+```
+
+#### Node Controller
 ##### Thiết lập IP, hostname
 
 
-- Thiết lập hostname với tên là `10.10.10.164` 
+- Thiết lập hostname với tên là `controller` 
 
 ```sh 
 echo "controller" > /etc/hostname
@@ -74,11 +77,14 @@ cat << EOF > /etc/hosts
 EOF
 
 ```
-Khởi động lại node 10.10.10.164
 
-`
-int 6
-`
+Update và khởi động lại node `controller`
+
+```sh
+apt-get update -y && apt-get upgrade -y && apt-get dist-upgrade -y && init 6
+```
+
+Đăng nhập với IP mới của node controller
 
 ### Cài đăt các gói phần mềm
 #### Cài đặt gói NTP
@@ -92,7 +98,7 @@ apt-get -y install chrony
 Sao lưu file /etc/chrony/chrony.conf 
 
 `
-cp /etc/chrony/chrony.conf  /etc/chrony/chrony.conf.ba
+cp /etc/chrony/chrony.conf  /etc/chrony/chrony.conf.bak
 `
 
 Sửa file ` /etc/chrony/chrony.conf` với lệnh sed
@@ -109,14 +115,6 @@ Khởi động lại NTP
 service chrony restart
 ```
 
-Khai báo các gói để cài đặt OpenStack Liberty
-
-```sh
-apt-get -y install software-properties-common
-add-apt-repository -y cloud-archive:liberty 
-```
-
-Update và khởi động lại sau khi khai báo repos cho OpenStack Liberty
 
 ```sh
 apt-get update -y && apt-get upgrade -y && apt-get dist-upgrade -y && init 6
