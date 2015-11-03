@@ -20,7 +20,7 @@ apt-get update -y && apt-get upgrade -y && apt-get dist-upgrade -y && init 6
 - Thiết lập hostname với tên là `10.10.10.164` 
 
 ```sh 
-echo "10.10.10.164" > /etc/hostname
+echo "controller" > /etc/hostname
 hostname -F /etc/hostname
 ```
 
@@ -166,7 +166,7 @@ apt-get -y install rabbitmq-server
 Tạo tài khoản `openstack` cho rabbitmq
 
 ```sh 
-rabbitmqctl add_user openstack Welecome123
+rabbitmqctl add_user openstack Welcome123
 ```
 
 Cấp quyền cho tài khoản openstack 
