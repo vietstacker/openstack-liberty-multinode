@@ -67,15 +67,14 @@ Cấu hình file /etc/hosts để phân giản IP cho các node
 
 ```sh
 cat << EOF > /etc/hosts 
-127.0.0.1   10.10.10.164
-10.10.10.164    10.10.10.164
+127.0.0.1   controller
+10.10.10.164    controller
 10.10.10.165    compute1
 10.10.10.166    compute2
 10.10.10.167    cinder
 10.10.10.169    swift1
 10.10.10.170    swift2
 EOF
-
 ```
 
 Update và khởi động lại node `controller`
@@ -113,11 +112,6 @@ sed -i 's/server 3.debian.pool.ntp.org offline minpoll 8/server 10.10.10.164 ibu
 Khởi động lại NTP
 ```sh
 service chrony restart
-```
-
-
-```sh
-apt-get update -y && apt-get upgrade -y && apt-get dist-upgrade -y && init 6
 ```
 
 Cài đặt gói OpenStack Client
