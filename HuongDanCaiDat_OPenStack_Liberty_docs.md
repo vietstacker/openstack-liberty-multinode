@@ -132,7 +132,7 @@ apt-get -y install mariadb-server python-pymysql
 Tạo file với nội dung sau
 
 ```sh
-cat << EOF  /etc/mysql/conf.d/mysqld_openstack.cnf
+cat << EOF  > /etc/mysql/conf.d/mysqld_openstack.cnf
 
 [mysqld]
 bind-address = 10.10.10.164
