@@ -147,6 +147,12 @@ EOF
 
 ``` 
 
+Khởi động lại MYSQL
+
+```sh
+service mysql restart
+```
+
 #### Cài đặt Message queue
 
 Cài đặt gói rabbitmq
@@ -187,6 +193,9 @@ IDENTIFIED BY 'Welcome123';
 
 GRANT ALL PRIVILEGES ON keystone.* TO 'keystone'@'%' \
 IDENTIFIED BY 'Welcome123';
+flush privileges;
+
+quit
 
 ```
 
