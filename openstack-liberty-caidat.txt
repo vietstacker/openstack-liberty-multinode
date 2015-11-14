@@ -1,0 +1,936 @@
+### Thiết lập cơ bản
+
+### Enable the OpenStack repository
+
+apt-get install software-properties-common -y
+add-apt-repository cloud-archive:liberty -y
+
+
+- Upgrade the packages on your host
+apt-get -y update && apt-get -y dist-upgrade
+
+- Install the OpenStack client
+apt-get -y install python-openstackclient
+
+- Reboot VM
+init 6
+
+
+### Install and configure the database server
+
+- Install the packages:
+apt-get -y install mariadb-server python-pymysql
+
+- Nhập pass trong quá trình cài.
+
+- Tạo file  /etc/mysql/conf.d/mysqld_openstack.cnf với nội dung sau
+
+[mysqld]
+bind-address = 0.0.0.0
+
+[mysqld]
+default-storage-engine = innodb
+innodb_file_per_table
+collation-server = utf8_general_ci
+init-connect = 'SET NAMES utf8'
+character-set-server = utf8
+
+- Khởi động lại MySQL
+
+service mysql restart
+
+### Install the message queue service
+- Install the package:
+apt-get -y install rabbitmq-server
+
+-Add the openstack user
+rabbitmqctl add_user openstack Welcome123
+ 
+Permit configuration, write, and read access for the openstack user
+
+### Install Keysonte
+- Use the database access client to connect to the database server as the root user
+mysql -u root -pWelcome123
+
+CREATE DATABASE keystone;
+GRANT ALL PRIVILEGES ON keystone.* TO 'keystone'@'localhost' \
+  IDENTIFIED BY 'Welcome123';
+GRANT ALL PRIVILEGES ON keystone.* TO 'keystone'@'%' \
+  IDENTIFIED BY 'Welcome123';
+
+
+- Disable the keystone service from starting automatically after installation
+ echo "manual" > /etc/init/keystone.override
+ 
+- Run the following command to install the packages
+
+apt-get -y install keystone apache2 libapache2-mod-wsgi memcached python-memcache
+
+- Edit the /etc/keystone/keystone.conf file and complete the following actions
+
+[DEFAULT]
+log_dir = /var/log/keystone
+
+admin_token = Welcome123
+public_bind_host = 172.16.69.160
+admin_bind_host = 172.16.69.160
+
+[assignment]
+[auth]
+[cache]
+[catalog]
+[cors]
+[cors.subdomain]
+[credential]
+[database]
+connection = mysql+pymysql://keystone:Welcome123@172.16.69.160/keystone
+
+
+[domain_config]
+[endpoint_filter]
+[endpoint_policy]
+[eventlet_server]
+[eventlet_server_ssl]
+[federation]
+[fernet_tokens]
+[identity]
+[identity_mapping]
+[kvs]
+[ldap]
+[matchmaker_redis]
+[matchmaker_ring]
+[memcache]
+servers = localhost:11211
+
+
+[oauth1]
+[os_inherit]
+[oslo_messaging_amqp]
+[oslo_messaging_qpid]
+[oslo_messaging_rabbit]
+[oslo_middleware]
+[oslo_policy]
+[paste_deploy]
+[policy]
+[resource]
+[revoke]
+driver = sql
+
+[role]
+[saml]
+[signing]
+[ssl]
+[token]
+provider = uuid
+driver = memcache
+
+[tokenless_auth]
+[trust]
+[extra_headers]
+Distribution = Ubuntu
+
+
+- Populate the Identity service database
+ su -s /bin/sh -c "keystone-manage db_sync" keystone
+ 
+#### Configure the Apache HTTP server
+- Edit the /etc/apache2/apache2.conf file and configure the ServerName option to reference the 172.16.69.160 node:
+
+ServerName 172.16.69.160
+
+
+- Create the /etc/apache2/sites-available/wsgi-keystone.conf file with the following content
+
+Listen 5000
+Listen 35357
+
+<VirtualHost *:5000>
+    WSGIDaemonProcess keystone-public processes=5 threads=1 user=keystone group=keystone display-name=%{GROUP}
+    WSGIProcessGroup keystone-public
+    WSGIScriptAlias / /usr/bin/keystone-wsgi-public
+    WSGIApplicationGroup %{GLOBAL}
+    WSGIPassAuthorization On
+    <IfVersion >= 2.4>
+      ErrorLogFormat "%{cu}t %M"
+    </IfVersion>
+    ErrorLog /var/log/apache2/keystone.log
+    CustomLog /var/log/apache2/keystone_access.log combined
+
+    <Directory /usr/bin>
+        <IfVersion >= 2.4>
+            Require all granted
+        </IfVersion>
+        <IfVersion < 2.4>
+            Order allow,deny
+            Allow from all
+        </IfVersion>
+    </Directory>
+</VirtualHost>
+
+<VirtualHost *:35357>
+    WSGIDaemonProcess keystone-admin processes=5 threads=1 user=keystone group=keystone display-name=%{GROUP}
+    WSGIProcessGroup keystone-admin
+    WSGIScriptAlias / /usr/bin/keystone-wsgi-admin
+    WSGIApplicationGroup %{GLOBAL}
+    WSGIPassAuthorization On
+    <IfVersion >= 2.4>
+      ErrorLogFormat "%{cu}t %M"
+    </IfVersion>
+    ErrorLog /var/log/apache2/keystone.log
+    CustomLog /var/log/apache2/keystone_access.log combined
+
+    <Directory /usr/bin>
+        <IfVersion >= 2.4>
+            Require all granted
+        </IfVersion>
+        <IfVersion < 2.4>
+            Order allow,deny
+            Allow from all
+        </IfVersion>
+    </Directory>
+</VirtualHost>
+
+- Enable the Identity service virtual hosts
+ ln -s /etc/apache2/sites-available/wsgi-keystone.conf /etc/apache2/sites-enabled
+ 
+- Restart the Apache HTTP server
+
+service apache2 restart
+
+- Because this configuration uses an SQL database server, you can remove the SQLite database file:
+rm -f /var/lib/keystone/keystone.db
+
+- Configure the authentication token, endpoint URL, Identity API version
+
+export OS_TOKEN=Welcome123
+export OS_URL=http://172.16.69.160:35357/v3
+export OS_IDENTITY_API_VERSION=3
+
+
+openstack service create --name keystone --description "OpenStack Identity" identity
+openstack endpoint create --region RegionOne identity public http://172.16.69.160:5000/v2.0
+openstack endpoint create --region RegionOne identity internal http://172.16.69.160:5000/v2.0
+openstack endpoint create --region RegionOne identity admin http://172.16.69.160:35357/v2.0
+
+openstack project create --domain default --description "Admin Project" admin
+openstack user create  --domain default --password Welcome123 admin
+openstack role create admin
+openstack role add --project admin --user admin admin
+openstack project create --domain default --description "Service Project" service
+openstack project create --domain default --description "Demo Project" demo
+openstack user create --domain default --password Welcome123 demo
+openstack role create user
+openstack role add --project demo --user demo user
+
+unset OS_TOKEN OS_URL
+
+- Create a file named creds and add the following lines
+export OS_PROJECT_DOMAIN_ID=default
+export OS_USER_DOMAIN_ID=default
+export OS_PROJECT_NAME=admin
+export OS_TENANT_NAME=admin
+export OS_USERNAME=admin
+export OS_PASSWORD=Welcome123
+export OS_AUTH_URL=http://172.16.69.160:35357/v3
+export OS_IDENTITY_API_VERSION=3
+
+#### Cài đặt GLANCE
+- Create the database, complete these steps
+
+mysql -u root -pWelcome123
+
+CREATE DATABASE glance;
+GRANT ALL PRIVILEGES ON glance.* TO 'glance'@'localhost' IDENTIFIED BY 'Welcome123';
+GRANT ALL PRIVILEGES ON glance.* TO 'glance'@'%' IDENTIFIED BY 'Welcome123';
+quit;
+
+
+- To create the service credentials, complete these steps
+
+openstack user create --domain default --password Welcome123 glance
+openstack role add --project service --user glance admin
+openstack service create --name glance --description "OpenStack Image service" image
+
+openstack endpoint create --region RegionOne image public http://172.16.69.160:9292
+openstack endpoint create --region RegionOne image internal http://172.16.69.160:9292
+openstack endpoint create --region RegionOne image admin http://172.16.69.160:9292
+
+
+- Install the packages GLANCE
+ apt-get -y install glance python-glanceclient
+ 
+- Edit the /etc/glance/glance-api.conf file and complete the following actions
+
+cp /etc/glance/glance-api.conf /etc/glance/glance-api.conf.bak
+cat /etc/glance/glance-api.conf.bak | grep -v ^$ | grep -v ^# > /etc/glance/glance-api.conf
+
+- Sửa /etc/glance/glance-api.conf  với nội dung sau
+
+[DEFAULT]
+notification_driver = noop
+verbose = True
+
+[database]
+connection = mysql+pymysql://glance:Welcome123@172.16.69.160/glance
+backend = sqlalchemy
+
+[glance_store]
+default_store = file
+filesystem_store_datadir = /var/lib/glance/images/
+
+[image_format]
+[keystone_authtoken]
+auth_uri = http://172.16.69.160:5000
+auth_url = http://172.16.69.160:35357
+auth_plugin = password
+project_domain_id = default
+user_domain_id = default
+project_name = service
+username = glance
+password = Welcome123
+
+
+[matchmaker_redis]
+[matchmaker_ring]
+[oslo_concurrency]
+[oslo_messaging_amqp]
+[oslo_messaging_qpid]
+[oslo_messaging_rabbit]
+[oslo_policy]
+[paste_deploy]
+flavor = keystone
+
+[store_type_location_strategy]
+[task]
+[taskflow_executor]
+
+
+
+- Edit the /etc/glance/glance-registry.conf file and complete the following actions
+cp /etc/glance/glance-registry.conf /etc/glance/glance-registry.conf.bak
+cat /etc/glance/glance-registry.conf.bak | grep -v ^$ | grep -v ^# > /etc/glance/glance-registry.conf
+
+
+
+- Sửa /etc/glance/glance-api.conf với nội dung sau
+
+
+[DEFAULT]
+notification_driver = noop
+verbose = True
+
+
+[database]
+connection = mysql+pymysql://glance:Welcome123@172.16.69.160/glance
+backend = sqlalchemy
+
+[glance_store]
+
+[keystone_authtoken]
+auth_uri = http://172.16.69.160:5000
+auth_url = http://172.16.69.160:35357
+auth_plugin = password
+project_domain_id = default
+user_domain_id = default
+project_name = service
+username = glance
+password = Welcome123
+
+
+[matchmaker_redis]
+[matchmaker_ring]
+[oslo_messaging_amqp]
+[oslo_messaging_qpid]
+[oslo_messaging_rabbit]
+[oslo_policy]
+[paste_deploy]
+flavor = keystone
+
+
+
+
+- Restart the Image service services
+service glance-registry restart
+service glance-api restart
+
+-  remove the SQLite database file
+rm -f /var/lib/glance/glance.sqlite
+
+
+echo "export OS_IMAGE_API_VERSION=2" | tee -a admin.sh
+source admin.sh
+
+- Download the source image
+wget http://download.cirros-cloud.net/0.3.4/cirros-0.3.4-x86_64-disk.img
+ 
+- Upload the image to the Image service 
+
+glance image-create --name "cirros" \
+--file cirros-0.3.4-x86_64-disk.img \
+--disk-format qcow2 --container-format bare \
+--visibility public --progress
+
+- Confirm upload of the image and validate attributes
+glance image-list
+
+#### Cài đặt NOVA
+#### Cài đặt NOVA trên CONTROLLER
+##### Prerequisites
+- To create the database, complete these steps
+
+mysql -u root -pWelcome123
+
+CREATE DATABASE nova;
+GRANT ALL PRIVILEGES ON nova.* TO 'nova'@'localhost' IDENTIFIED BY 'Welcome123';
+GRANT ALL PRIVILEGES ON nova.* TO 'nova'@'%' IDENTIFIED BY 'Welcome123';
+exit
+
+source admin.sh
+
+- To create the service credentials, complete these steps
+
+openstack user create --domain default --password Welcome123 nova
+
+openstack role add --project service --user nova admin
+
+
+openstack service create --name nova --description "OpenStack Compute" compute
+
+openstack endpoint create --region RegionOne compute public http://172.16.69.160:8774/v2/%\(tenant_id\)s
+openstack endpoint create --region RegionOne compute internal http://172.16.69.160:8774/v2/%\(tenant_id\)s
+openstack endpoint create --region RegionOne compute admin http://172.16.69.160:8774/v2/%\(tenant_id\)s
+
+
+
+#### Install and configure components Nova
+- Install the packages
+apt-get -y install nova-api nova-cert nova-conductor nova-consoleauth nova-novncproxy nova-scheduler python-novaclient
+
+- Edit the /etc/nova/nova.conf file and complete the following actions:
+
+cp /etc/nova/nova.conf  /etc/nova/nova.conf.bak
+cat  /etc/nova/nova.conf.bak | grep -v ^# | grep -v ^$
+
+########################################
+[DEFAULT]
+
+rpc_backend = rabbit
+auth_strategy = keystone
+
+dhcpbridge_flagfile=/etc/nova/nova.conf
+dhcpbridge=/usr/bin/nova-dhcpbridge
+logdir=/var/log/nova
+state_path=/var/lib/nova
+lock_path=/var/lock/nova
+force_dhcp_release=True
+libvirt_use_virtio_for_bridges=True
+verbose=True
+ec2_private_dns_show_ip=True
+api_paste_config=/etc/nova/api-paste.ini
+enabled_apis=ec2,osapi_compute,metadata
+
+my_ip = 172.16.69.160
+
+network_api_class = nova.network.neutronv2.api.API
+security_group_api = neutron
+linuxnet_interface_driver = nova.network.linux_net.NeutronLinuxBridgeInterfaceDriver
+firewall_driver = nova.virt.firewall.NoopFirewallDriver
+
+enabled_apis=osapi_compute,metadata
+verbose = True
+
+
+[database]
+connection = mysql+pymysql://nova:Welcome123@172.16.69.160/nova
+
+[oslo_messaging_rabbit]
+rabbit_host = 172.16.69.160
+rabbit_userid = openstack
+rabbit_password = Welcome123
+
+[keystone_authtoken]
+auth_uri = http://172.16.69.160:5000
+auth_url = http://172.16.69.160:35357
+auth_plugin = password
+project_domain_id = default
+user_domain_id = default
+project_name = service
+username = nova
+password = Welcome123
+
+[vnc]
+vncserver_listen = $my_ip
+vncserver_proxyclient_address = $my_ip
+
+[glance]
+host = 172.16.69.160
+
+[oslo_concurrency]
+lock_path = /var/lib/nova/tmp
+
+########################################
+
+- Populate the Compute database
+ su -s /bin/sh -c "nova-manage db sync" nova
+
+- Restart the Compute services
+
+service nova-api restart
+service nova-cert restart
+service nova-consoleauth restart
+service nova-scheduler restart
+service nova-conductor restart
+service nova-novncproxy restart
+ 
+- remove the SQLite database file
+rm -f /var/lib/nova/nova.sqlite
+
+#### Cài đặt trên COMPUTE NODE
+
+- Thiết lập IP
+
+- Thiết lập hostname
+
+### Enable the OpenStack repository
+
+apt-get install software-properties-common -y
+add-apt-repository cloud-archive:liberty -y
+
+
+- Upgrade the packages on your host
+apt-get -y update && apt-get -y dist-upgrade
+
+- Install the OpenStack client
+apt-get -y install python-openstackclient
+
+- Install the packages
+apt-get -y install nova-compute sysfsutils
+
+
+- Edit the /etc/nova/nova.conf file and complete the following actions
+##############################
+
+
+[DEFAULT]
+dhcpbridge_flagfile=/etc/nova/nova.conf
+dhcpbridge=/usr/bin/nova-dhcpbridge
+logdir=/var/log/nova
+state_path=/var/lib/nova
+lock_path=/var/lock/nova
+force_dhcp_release=True
+libvirt_use_virtio_for_bridges=True
+verbose=True
+ec2_private_dns_show_ip=True
+api_paste_config=/etc/nova/api-paste.ini
+enabled_apis=ec2,osapi_compute,metadata
+
+rpc_backend = rabbit
+auth_strategy = keystone
+my_ip = 172.16.69.161
+
+network_api_class = nova.network.neutronv2.api.API
+security_group_api = neutron
+linuxnet_interface_driver = nova.network.linux_net.NeutronLinuxBridgeInterfaceDriver
+firewall_driver = nova.virt.firewall.NoopFirewallDriver
+
+verbose = True
+
+
+[oslo_messaging_rabbit]
+rabbit_host = 172.16.69.160
+rabbit_userid = openstack
+rabbit_password = Welcome123
+
+[keystone_authtoken]
+auth_uri = http://172.16.69.160:5000
+auth_url = http://172.16.69.160:35357
+auth_plugin = password
+project_domain_id = default
+user_domain_id = default
+project_name = service
+username = nova
+password = Welcome123
+
+
+
+[vnc]
+enabled = True
+vncserver_listen = 0.0.0.0
+vncserver_proxyclient_address = $my_ip
+novncproxy_base_url = http://172.16.69.160:6080/vnc_auto.html
+
+[glance]
+host = 172.16.69.160
+
+[oslo_concurrency]
+lock_path = /var/lib/nova/tmp
+
+##############################
+
+- Restart the Compute service:
+
+service nova-compute restart
+
+- remove the SQLite database file
+ rm -f /var/lib/nova/nova.sqlite
+
+- Verify operation NOVA
+nova service-list
+
+
+##### NEUTRON ####
+### NEUTRON Install and configure controller node
+####  Prerequisites
+- To create the database, complete these steps:
+mysql -u root -pWelcome123
+
+CREATE DATABASE neutron;
+GRANT ALL PRIVILEGES ON neutron.* TO 'neutron'@'localhost' IDENTIFIED BY 'Welcome123';
+GRANT ALL PRIVILEGES ON neutron.* TO 'neutron'@'%' IDENTIFIED BY 'Welcome123';
+exit;
+
+source admin.sh
+
+- Create the neutron user
+
+openstack user create --domain default --password Welcome123 neutron
+
+openstack role add --project service --user neutron admin
+
+openstack service create --name neutron --description "OpenStack Networking" network
+
+openstack endpoint create --region RegionOne network public http://172.16.69.160:9696
+openstack endpoint create --region RegionOne network internal http://172.16.69.160:9696
+openstack endpoint create --region RegionOne network admin http://172.16.69.160:9696
+
+- Install and configure the Networking components on the controller node (cài theo option2)
+
+apt-get -y install neutron-server neutron-plugin-ml2 \
+neutron-plugin-linuxbridge-agent neutron-l3-agent neutron-dhcp-agent \
+neutron-metadata-agent python-neutronclient
+
+  
+- Sao lưu file cấu hình
+
+cp /etc/neutron/neutron.conf /etc/neutron/neutron.conf.bak
+cat /etc/neutron/neutron.conf.bak | grep -v ^# | grep -v ^$ > /etc/neutron/neutron.conf
+
+- Nội dung file neutron như sau:
+
+[DEFAULT]
+core_plugin = ml2
+service_plugins = router
+allow_overlapping_ips = True
+rpc_backend = rabbit
+
+auth_strategy = keystone
+
+notify_nova_on_port_status_changes = True
+notify_nova_on_port_data_changes = True
+nova_url = http://172.16.69.160:8774/v2
+
+verbose = True
+
+
+[matchmaker_redis]
+[matchmaker_ring]
+[quotas]
+[agent]
+root_helper = sudo /usr/bin/neutron-rootwrap /etc/neutron/rootwrap.conf
+
+[keystone_authtoken]
+auth_uri = http://172.16.69.160:5000
+auth_url = http://172.16.69.160:35357
+auth_plugin = password
+project_domain_id = default
+user_domain_id = default
+project_name = service
+username = neutron
+password = Welcome123
+
+
+[database]
+connection = mysql+pymysql://neutron:Welcome123@172.16.69.160/neutron
+
+
+[nova]
+auth_url = http://172.16.69.160:35357
+auth_plugin = password
+project_domain_id = default
+user_domain_id = default
+region_name = RegionOne
+project_name = service
+username = nova
+password = Welcome123
+
+[oslo_concurrency]
+lock_path = $state_path/lock
+[oslo_policy]
+[oslo_messaging_amqp]
+[oslo_messaging_qpid]
+
+[oslo_messaging_rabbit]
+rabbit_host = 172.16.69.160
+rabbit_userid = openstack
+rabbit_password = Welcome123
+
+[qos]
+
+### Configure the Modular Layer 2 (ML2) plug-in
+
+cp etc/neutron/plugins/ml2/ml2_conf.ini  /etc/neutron/plugins/ml2/ml2_conf.ini.bak
+
+- Sửa file /etc/neutron/plugins/ml2/ml2_conf.ini  với nội dung sau
+
+#######################################
+[ml2]
+tenant_network_types = vxlan
+type_drivers = flat,vlan,vxlan
+mechanism_drivers = linuxbridge,l2population
+extension_drivers = port_security
+
+
+[ml2_type_flat]
+flat_networks = public
+
+[ml2_type_vlan]
+
+[ml2_type_gre]
+[ml2_type_vxlan]
+vni_ranges = 1:1000
+
+[ml2_type_geneve]
+[securitygroup]
+enable_ipset = True
+
+#######################################
+
+#### Configure the Linux bridge agent
+
+cp /etc/neutron/plugins/ml2/linuxbridge_agent.ini /etc/neutron/plugins/ml2/linuxbridge_agent.ini.bak
+
+- nội dung file /etc/neutron/plugins/ml2/linuxbridge_agent.ini 
+
+#######################################
+
+[linux_bridge]
+physical_interface_mappings = public:eth1
+
+[vxlan]
+enable_vxlan = True
+local_ip = 172.16.69.160
+l2_population = True
+
+
+[agent]
+enable_security_group = True
+firewall_driver = neutron.agent.linux.iptables_firewall.IptablesFirewallDriver
+
+[securitygroup]
+
+#######################################
+### Configure the layer-3 agent
+
+cp /etc/neutron/l3_agent.ini /etc/neutron/l3_agent.ini.bak
+
+- Nội dung file  /etc/neutron/l3_agent.ini
+
+#######################################
+
+[DEFAULT]
+interface_driver = neutron.agent.linux.interface.BridgeInterfaceDriver
+external_network_bridge =
+verbose = True
+
+
+[AGENT]
+
+#######################################
+
+#### Configure the DHCP agent
+cp /etc/neutron/dhcp_agent.ini /etc/neutron/dhcp_agent.ini.bak
+
+- Nội dung file  /etc/neutron/dhcp_agent.ini
+
+#######################################
+
+[DEFAULT]
+interface_driver = neutron.agent.linux.interface.BridgeInterfaceDriver
+dhcp_driver = neutron.agent.linux.dhcp.Dnsmasq
+enable_isolated_metadata = True
+
+verbose = True
+dnsmasq_config_file = /etc/neutron/dnsmasq-neutron.conf
+dhcp-option-force=26,1450
+
+[AGENT]
+
+#######################################
+
+### Configure the metadata agent
+- Sua file  /etc/neutron/metadata_agent.ini  voi noi dung
+
+#######################################
+[DEFAULT]
+auth_uri = http://172.16.69.160:5000
+auth_url = http://172.16.69.160:35357
+auth_region = RegionOne
+auth_plugin = password
+project_domain_id = default
+user_domain_id = default
+project_name = service
+username = neutron
+password = Welcome123
+
+nova_metadata_ip = 172.16.69.160
+
+metadata_proxy_shared_secret = Welcome123
+verbose = True
+#######################################
+
+- Thêm vào file nova.conf đoạn dưới cùng dưới
+
+[neutron]
+url = http://172.16.69.160:9696
+auth_url = http://172.16.69.160:35357
+auth_plugin = password
+project_domain_id = default
+user_domain_id = default
+region_name = RegionOne
+project_name = service
+username = neutron
+password = Welcome123
+
+service_metadata_proxy = True
+metadata_proxy_shared_secret = Welcome123
+
+
+### Populate the database:
+
+su -s /bin/sh -c "neutron-db-manage --config-file /etc/neutron/neutron.conf \
+  --config-file /etc/neutron/plugins/ml2/ml2_conf.ini upgrade head" neutron
+  
+- Restart the Compute API service:
+service nova-api restart
+
+- Restart the Networking services
+
+service neutron-server restart
+service neutron-plugin-linuxbridge-agent restart
+service neutron-dhcp-agent restart
+service neutron-metadata-agent restart
+
+- restart the layer-3 service
+service neutron-l3-agent restart
+
+-  remove the SQLite database file:
+rm -f /var/lib/neutron/neutron.sqlite
+
+####  NEUTRON Install and configure compute node
+- Install the components
+apt-get -y install neutron-plugin-linuxbridge-agent
+
+- File  /etc/neutron/neutron.conf co noi dung sau
+
+#######################################
+
+[DEFAULT]
+core_plugin = ml2
+
+rpc_backend = rabbit
+auth_strategy = keystone
+verbose = True
+
+
+
+[matchmaker_redis]
+[matchmaker_ring]
+[quotas]
+[agent]
+root_helper = sudo /usr/bin/neutron-rootwrap /etc/neutron/rootwrap.conf
+
+[keystone_authtoken]
+auth_uri = http://172.16.69.160:5000
+auth_url = http://172.16.69.160:35357
+auth_plugin = password
+project_domain_id = default
+user_domain_id = default
+project_name = service
+username = neutron
+password = Welcome123
+
+
+[database]
+connection = sqlite:////var/lib/neutron/neutron.sqlite
+
+[nova]
+[oslo_concurrency]
+lock_path = $state_path/lock
+[oslo_policy]
+[oslo_messaging_amqp]
+[oslo_messaging_qpid]
+
+[oslo_messaging_rabbit]
+rabbit_host = 172.16.69.160
+rabbit_userid = openstack
+rabbit_password = Welcome123
+
+[qos]
+#######################################
+
+### Configure the Linux bridge agent
+
+cp /etc/neutron/plugins/ml2/linuxbridge_agent.ini /etc/neutron/plugins/ml2/linuxbridge_agent.ini.bak
+
+- Edit the /etc/neutron/plugins/ml2/linuxbridge_agent.ini 
+
+#######################################
+
+[linux_bridge]
+physical_interface_mappings = public:eth1
+
+[vxlan]
+enable_vxlan = True
+local_ip = 172.16.69.161
+l2_population = True
+
+[agent]
+prevent_arp_spoofing = True
+
+[securitygroup]
+enable_security_group = True
+firewall_driver = neutron.agent.linux.iptables_firewall.IptablesFirewallDriver
+
+#######################################
+
+- Them vao duoi cung file  /etc/nova/nova.conf  tren node Compute
+
+#######################################
+[neutron]
+url = http://172.16.69.160:9696
+auth_url = http://172.16.69.160:35357
+auth_plugin = password
+project_domain_id = default
+user_domain_id = default
+region_name = RegionOne
+project_name = service
+username = neutron
+password = Welcome123
+#######################################
+
+- Restart the Compute service:
+
+service nova-compute restart
+
+- Restart the Linux bridge agent:
+
+service neutron-plugin-linuxbridge-agent restart
+
+
+
+
+#### Cai dat dashboad tren CONTROLLER ####
+- To install the dashboard components
+apt-get - y install openstack-dashboard
+
+
