@@ -46,18 +46,23 @@ apt-get -y install rabbitmq-server
 -Add the openstack user
 rabbitmqctl add_user openstack Welcome123
  
-Permit configuration, write, and read access for the openstack user
+ 
+- Permit configuration, write, and read access for the openstack user
+
+rabbitmqctl set_permissions openstack ".*" ".*" ".*"
+
 
 ### Install Keysonte
 - Use the database access client to connect to the database server as the root user
+
+```sh 
 mysql -u root -pWelcome123
 
 CREATE DATABASE keystone;
-GRANT ALL PRIVILEGES ON keystone.* TO 'keystone'@'localhost' \
-  IDENTIFIED BY 'Welcome123';
-GRANT ALL PRIVILEGES ON keystone.* TO 'keystone'@'%' \
-  IDENTIFIED BY 'Welcome123';
-
+GRANT ALL PRIVILEGES ON keystone.* TO 'keystone'@'localhost' IDENTIFIED BY 'Welcome123';
+GRANT ALL PRIVILEGES ON keystone.* TO 'keystone'@'%' IDENTIFIED BY 'Welcome123';
+exit;
+```
 
 - Disable the keystone service from starting automatically after installation
  echo "manual" > /etc/init/keystone.override
@@ -66,14 +71,21 @@ GRANT ALL PRIVILEGES ON keystone.* TO 'keystone'@'%' \
 
 apt-get -y install keystone apache2 libapache2-mod-wsgi memcached python-memcache
 
+- Sao luu file cau hinh 
+
+cp /etc/keystone/keystone.conf /etc/keystone/keystone.conf.bak
+
+
 - Edit the /etc/keystone/keystone.conf file and complete the following actions
+
+```sh 
 
 [DEFAULT]
 log_dir = /var/log/keystone
 
 admin_token = Welcome123
-public_bind_host = 172.16.69.160
-admin_bind_host = 172.16.69.160
+public_bind_host = 10.10.10.120
+admin_bind_host = 10.10.10.120
 
 [assignment]
 [auth]
@@ -83,7 +95,7 @@ admin_bind_host = 172.16.69.160
 [cors.subdomain]
 [credential]
 [database]
-connection = mysql+pymysql://keystone:Welcome123@172.16.69.160/keystone
+connection = mysql+pymysql://keystone:Welcome123@10.10.10.120/keystone
 
 
 [domain_config]
@@ -129,18 +141,23 @@ driver = memcache
 [extra_headers]
 Distribution = Ubuntu
 
+```
 
 - Populate the Identity service database
- su -s /bin/sh -c "keystone-manage db_sync" keystone
- 
-#### Configure the Apache HTTP server
-- Edit the /etc/apache2/apache2.conf file and configure the ServerName option to reference the 172.16.69.160 node:
 
-ServerName 172.16.69.160
+```sh
+su -s /bin/sh -c "keystone-manage db_sync" keystone
+```
+
+#### Configure the Apache HTTP server
+- Edit the /etc/apache2/apache2.conf file and configure the ServerName option to reference the 10.10.10.120 node:
+
+echo "ServerName 10.10.10.120" >> /etc/apache2/apache2.conf
 
 
 - Create the /etc/apache2/sites-available/wsgi-keystone.conf file with the following content
 
+```sh
 Listen 5000
 Listen 35357
 
@@ -190,6 +207,7 @@ Listen 35357
     </Directory>
 </VirtualHost>
 
+```
 - Enable the Identity service virtual hosts
  ln -s /etc/apache2/sites-available/wsgi-keystone.conf /etc/apache2/sites-enabled
  
@@ -203,14 +221,14 @@ rm -f /var/lib/keystone/keystone.db
 - Configure the authentication token, endpoint URL, Identity API version
 
 export OS_TOKEN=Welcome123
-export OS_URL=http://172.16.69.160:35357/v3
+export OS_URL=http://10.10.10.120:35357/v3
 export OS_IDENTITY_API_VERSION=3
 
 
 openstack service create --name keystone --description "OpenStack Identity" identity
-openstack endpoint create --region RegionOne identity public http://172.16.69.160:5000/v2.0
-openstack endpoint create --region RegionOne identity internal http://172.16.69.160:5000/v2.0
-openstack endpoint create --region RegionOne identity admin http://172.16.69.160:35357/v2.0
+openstack endpoint create --region RegionOne identity public http://10.10.10.120:5000/v2.0
+openstack endpoint create --region RegionOne identity internal http://10.10.10.120:5000/v2.0
+openstack endpoint create --region RegionOne identity admin http://10.10.10.120:35357/v2.0
 
 openstack project create --domain default --description "Admin Project" admin
 openstack user create  --domain default --password Welcome123 admin
@@ -231,7 +249,7 @@ export OS_PROJECT_NAME=admin
 export OS_TENANT_NAME=admin
 export OS_USERNAME=admin
 export OS_PASSWORD=Welcome123
-export OS_AUTH_URL=http://172.16.69.160:35357/v3
+export OS_AUTH_URL=http://10.10.10.120:35357/v3
 export OS_IDENTITY_API_VERSION=3
 
 #### Cài đặt GLANCE
@@ -251,9 +269,9 @@ openstack user create --domain default --password Welcome123 glance
 openstack role add --project service --user glance admin
 openstack service create --name glance --description "OpenStack Image service" image
 
-openstack endpoint create --region RegionOne image public http://172.16.69.160:9292
-openstack endpoint create --region RegionOne image internal http://172.16.69.160:9292
-openstack endpoint create --region RegionOne image admin http://172.16.69.160:9292
+openstack endpoint create --region RegionOne image public http://10.10.10.120:9292
+openstack endpoint create --region RegionOne image internal http://10.10.10.120:9292
+openstack endpoint create --region RegionOne image admin http://10.10.10.120:9292
 
 
 - Install the packages GLANCE
@@ -266,12 +284,14 @@ cat /etc/glance/glance-api.conf.bak | grep -v ^$ | grep -v ^# > /etc/glance/glan
 
 - Sửa /etc/glance/glance-api.conf  với nội dung sau
 
+```sh
+
 [DEFAULT]
 notification_driver = noop
 verbose = True
 
 [database]
-connection = mysql+pymysql://glance:Welcome123@172.16.69.160/glance
+connection = mysql+pymysql://glance:Welcome123@10.10.10.120/glance
 backend = sqlalchemy
 
 [glance_store]
@@ -280,8 +300,8 @@ filesystem_store_datadir = /var/lib/glance/images/
 
 [image_format]
 [keystone_authtoken]
-auth_uri = http://172.16.69.160:5000
-auth_url = http://172.16.69.160:35357
+auth_uri = http://10.10.10.120:5000
+auth_url = http://10.10.10.120:35357
 auth_plugin = password
 project_domain_id = default
 user_domain_id = default
@@ -304,7 +324,7 @@ flavor = keystone
 [task]
 [taskflow_executor]
 
-
+```
 
 - Edit the /etc/glance/glance-registry.conf file and complete the following actions
 cp /etc/glance/glance-registry.conf /etc/glance/glance-registry.conf.bak
@@ -312,8 +332,9 @@ cat /etc/glance/glance-registry.conf.bak | grep -v ^$ | grep -v ^# > /etc/glance
 
 
 
-- Sửa /etc/glance/glance-api.conf với nội dung sau
+- Sửa /etc/glance/glance-registry.conf với nội dung sau
 
+```sh
 
 [DEFAULT]
 notification_driver = noop
@@ -321,14 +342,14 @@ verbose = True
 
 
 [database]
-connection = mysql+pymysql://glance:Welcome123@172.16.69.160/glance
+connection = mysql+pymysql://glance:Welcome123@10.10.10.120/glance
 backend = sqlalchemy
 
 [glance_store]
 
 [keystone_authtoken]
-auth_uri = http://172.16.69.160:5000
-auth_url = http://172.16.69.160:35357
+auth_uri = http://10.10.10.120:5000
+auth_url = http://10.10.10.120:35357
 auth_plugin = password
 project_domain_id = default
 user_domain_id = default
@@ -347,6 +368,10 @@ password = Welcome123
 flavor = keystone
 
 
+```
+
+- Populate the Image service database
+su -s /bin/sh -c "glance-manage db_sync" glance
 
 
 - Restart the Image service services
@@ -396,9 +421,9 @@ openstack role add --project service --user nova admin
 
 openstack service create --name nova --description "OpenStack Compute" compute
 
-openstack endpoint create --region RegionOne compute public http://172.16.69.160:8774/v2/%\(tenant_id\)s
-openstack endpoint create --region RegionOne compute internal http://172.16.69.160:8774/v2/%\(tenant_id\)s
-openstack endpoint create --region RegionOne compute admin http://172.16.69.160:8774/v2/%\(tenant_id\)s
+openstack endpoint create --region RegionOne compute public http://10.10.10.120:8774/v2/%\(tenant_id\)s
+openstack endpoint create --region RegionOne compute internal http://10.10.10.120:8774/v2/%\(tenant_id\)s
+openstack endpoint create --region RegionOne compute admin http://10.10.10.120:8774/v2/%\(tenant_id\)s
 
 
 
@@ -429,7 +454,7 @@ ec2_private_dns_show_ip=True
 api_paste_config=/etc/nova/api-paste.ini
 enabled_apis=ec2,osapi_compute,metadata
 
-my_ip = 172.16.69.160
+my_ip = 10.10.10.120
 
 network_api_class = nova.network.neutronv2.api.API
 security_group_api = neutron
@@ -441,16 +466,16 @@ verbose = True
 
 
 [database]
-connection = mysql+pymysql://nova:Welcome123@172.16.69.160/nova
+connection = mysql+pymysql://nova:Welcome123@10.10.10.120/nova
 
 [oslo_messaging_rabbit]
-rabbit_host = 172.16.69.160
+rabbit_host = 10.10.10.120
 rabbit_userid = openstack
 rabbit_password = Welcome123
 
 [keystone_authtoken]
-auth_uri = http://172.16.69.160:5000
-auth_url = http://172.16.69.160:35357
+auth_uri = http://10.10.10.120:5000
+auth_url = http://10.10.10.120:35357
 auth_plugin = password
 project_domain_id = default
 user_domain_id = default
@@ -463,7 +488,7 @@ vncserver_listen = $my_ip
 vncserver_proxyclient_address = $my_ip
 
 [glance]
-host = 172.16.69.160
+host = 10.10.10.120
 
 [oslo_concurrency]
 lock_path = /var/lib/nova/tmp
@@ -537,13 +562,13 @@ verbose = True
 
 
 [oslo_messaging_rabbit]
-rabbit_host = 172.16.69.160
+rabbit_host = 10.10.10.120
 rabbit_userid = openstack
 rabbit_password = Welcome123
 
 [keystone_authtoken]
-auth_uri = http://172.16.69.160:5000
-auth_url = http://172.16.69.160:35357
+auth_uri = http://10.10.10.120:5000
+auth_url = http://10.10.10.120:35357
 auth_plugin = password
 project_domain_id = default
 user_domain_id = default
@@ -557,10 +582,10 @@ password = Welcome123
 enabled = True
 vncserver_listen = 0.0.0.0
 vncserver_proxyclient_address = $my_ip
-novncproxy_base_url = http://172.16.69.160:6080/vnc_auto.html
+novncproxy_base_url = http://10.10.10.120:6080/vnc_auto.html
 
 [glance]
-host = 172.16.69.160
+host = 10.10.10.120
 
 [oslo_concurrency]
 lock_path = /var/lib/nova/tmp
@@ -599,9 +624,9 @@ openstack role add --project service --user neutron admin
 
 openstack service create --name neutron --description "OpenStack Networking" network
 
-openstack endpoint create --region RegionOne network public http://172.16.69.160:9696
-openstack endpoint create --region RegionOne network internal http://172.16.69.160:9696
-openstack endpoint create --region RegionOne network admin http://172.16.69.160:9696
+openstack endpoint create --region RegionOne network public http://10.10.10.120:9696
+openstack endpoint create --region RegionOne network internal http://10.10.10.120:9696
+openstack endpoint create --region RegionOne network admin http://10.10.10.120:9696
 
 - Install and configure the Networking components on the controller node (cài theo option2)
 
@@ -627,7 +652,7 @@ auth_strategy = keystone
 
 notify_nova_on_port_status_changes = True
 notify_nova_on_port_data_changes = True
-nova_url = http://172.16.69.160:8774/v2
+nova_url = http://10.10.10.120:8774/v2
 
 verbose = True
 
@@ -639,8 +664,8 @@ verbose = True
 root_helper = sudo /usr/bin/neutron-rootwrap /etc/neutron/rootwrap.conf
 
 [keystone_authtoken]
-auth_uri = http://172.16.69.160:5000
-auth_url = http://172.16.69.160:35357
+auth_uri = http://10.10.10.120:5000
+auth_url = http://10.10.10.120:35357
 auth_plugin = password
 project_domain_id = default
 user_domain_id = default
@@ -650,11 +675,11 @@ password = Welcome123
 
 
 [database]
-connection = mysql+pymysql://neutron:Welcome123@172.16.69.160/neutron
+connection = mysql+pymysql://neutron:Welcome123@10.10.10.120/neutron
 
 
 [nova]
-auth_url = http://172.16.69.160:35357
+auth_url = http://10.10.10.120:35357
 auth_plugin = password
 project_domain_id = default
 user_domain_id = default
@@ -670,7 +695,7 @@ lock_path = $state_path/lock
 [oslo_messaging_qpid]
 
 [oslo_messaging_rabbit]
-rabbit_host = 172.16.69.160
+rabbit_host = 10.10.10.120
 rabbit_userid = openstack
 rabbit_password = Welcome123
 
@@ -718,7 +743,7 @@ physical_interface_mappings = public:eth1
 
 [vxlan]
 enable_vxlan = True
-local_ip = 172.16.69.160
+local_ip = 10.10.10.120
 l2_population = True
 
 
@@ -772,8 +797,8 @@ dhcp-option-force=26,1450
 
 #######################################
 [DEFAULT]
-auth_uri = http://172.16.69.160:5000
-auth_url = http://172.16.69.160:35357
+auth_uri = http://10.10.10.120:5000
+auth_url = http://10.10.10.120:35357
 auth_region = RegionOne
 auth_plugin = password
 project_domain_id = default
@@ -782,7 +807,7 @@ project_name = service
 username = neutron
 password = Welcome123
 
-nova_metadata_ip = 172.16.69.160
+nova_metadata_ip = 10.10.10.120
 
 metadata_proxy_shared_secret = Welcome123
 verbose = True
@@ -791,8 +816,8 @@ verbose = True
 - Thêm vào file nova.conf đoạn dưới cùng dưới
 
 [neutron]
-url = http://172.16.69.160:9696
-auth_url = http://172.16.69.160:35357
+url = http://10.10.10.120:9696
+auth_url = http://10.10.10.120:35357
 auth_plugin = password
 project_domain_id = default
 user_domain_id = default
@@ -850,8 +875,8 @@ verbose = True
 root_helper = sudo /usr/bin/neutron-rootwrap /etc/neutron/rootwrap.conf
 
 [keystone_authtoken]
-auth_uri = http://172.16.69.160:5000
-auth_url = http://172.16.69.160:35357
+auth_uri = http://10.10.10.120:5000
+auth_url = http://10.10.10.120:35357
 auth_plugin = password
 project_domain_id = default
 user_domain_id = default
@@ -871,7 +896,7 @@ lock_path = $state_path/lock
 [oslo_messaging_qpid]
 
 [oslo_messaging_rabbit]
-rabbit_host = 172.16.69.160
+rabbit_host = 10.10.10.120
 rabbit_userid = openstack
 rabbit_password = Welcome123
 
@@ -907,8 +932,8 @@ firewall_driver = neutron.agent.linux.iptables_firewall.IptablesFirewallDriver
 
 #######################################
 [neutron]
-url = http://172.16.69.160:9696
-auth_url = http://172.16.69.160:35357
+url = http://10.10.10.120:9696
+auth_url = http://10.10.10.120:35357
 auth_plugin = password
 project_domain_id = default
 user_domain_id = default
