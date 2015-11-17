@@ -348,7 +348,7 @@ Xóa SQLite mặc định của keystone
 rm -f /var/lib/keystone/keystone.db
 ```
 
-Tạo endpoint 
+Khai báo biến môi trường để cài đặt KeyStone
 
 ```sh
 export OS_TOKEN=Welcome123
@@ -418,5 +418,85 @@ openstack token issue
 | project_id | c685a5fa3e474261b678aeb59332ce0d |
 | user_id    | 818e335d15484101b6a2a69e5f9d4f61 |
 +------------+----------------------------------+
-
 ```
+
+##### Cài đặt GLANCE 
+- Glance chỉ cần cài đặt trên Controller
+- Tạo database và phân quyền bằng các lệnh dưới
+```sh
+mysql -u root -pWelcome123
+
+CREATE DATABASE glance;
+GRANT ALL PRIVILEGES ON glance.* TO 'glance'@'localhost' IDENTIFIED BY 'Welcome123';
+GRANT ALL PRIVILEGES ON glance.* TO 'glance'@'%' IDENTIFIED BY 'Welcome123';
+quit;
+```
+
+- Tạo user, endpoint, gán role cho glance trong keystone
+```sh
+openstack user create --domain default --password Welcome123 glance
+openstack role add --project service --user glance admin
+openstack service create --name glance --description "OpenStack Image service" image
+
+openstack endpoint create --region RegionOne image public http://10.10.10.120:9292
+openstack endpoint create --region RegionOne image internal http://10.10.10.120:9292
+openstack endpoint create --region RegionOne image admin http://10.10.10.120:9292
+```
+
+- Cài đặt các gói trong glance
+```sh
+apt-get -y install glance python-glanceclient
+```
+
+- Sao lưu file cấu hình gốc của glance 
+```sh
+cp /etc/glance/glance-api.conf /etc/glance/glance-api.conf.bak
+```
+
+- Xóa file glance gốc 
+```sh
+rm /etc/glance/glance-api.conf 
+```
+
+- Tạo file glan-api.conf với bằng lệnh `vi /etc/glance/glance-api.conf` với nội dung sau
+```sh
+
+[DEFAULT]
+notification_driver = noop
+verbose = True
+
+[database]
+connection = mysql+pymysql://glance:Welcome123@10.10.10.120/glance
+backend = sqlalchemy
+
+[glance_store]
+default_store = file
+filesystem_store_datadir = /var/lib/glance/images/
+
+[image_format]
+[keystone_authtoken]
+auth_uri = http://10.10.10.120:5000
+auth_url = http://10.10.10.120:35357
+auth_plugin = password
+project_domain_id = default
+user_domain_id = default
+project_name = service
+username = glance
+password = Welcome123
+
+
+[matchmaker_redis]
+[matchmaker_ring]
+[oslo_concurrency]
+[oslo_messaging_amqp]
+[oslo_messaging_qpid]
+[oslo_messaging_rabbit]
+[oslo_policy]
+[paste_deploy]
+flavor = keystone
+
+[store_type_location_strategy]
+[task]
+[taskflow_executor]
+```
+
