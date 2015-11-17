@@ -375,9 +375,12 @@ openstack role create user
 openstack role add --project demo --user demo user
 ```
 
+- Hủy 02 biến môi trường đã khai báo trước đó
+```sh
 unset OS_TOKEN OS_URL
+```
 
-- Tạo file admin.sh với nội dung dưới bằng lệnh vi admin.sh
+- Tạo file admin.sh với nội dung dưới bằng lệnh `vi admin.sh`
 
 ```sh
 export OS_PROJECT_DOMAIN_ID=default
@@ -393,4 +396,27 @@ export OS_IDENTITY_API_VERSION=3
 - Phân quyền cho file `admin.sh`
 ```sh
 chmod +x admin.sh
+```
+
+- Chạy lênh dưới để khai báo biến môi trường
+```sh
+source admin.sh
+```
+
+- Kiểm tra xem keystone hoạt động tốt hay chưa bằng lệnh
+```sh
+openstack token issue
+```
+
+- Kết quả tương tự như dưới
+```sh
++------------+----------------------------------+
+| Field      | Value                            |
++------------+----------------------------------+
+| expires    | 2015-11-17T09:53:40.242778Z      |
+| id         | de796ac24b2545efb99487d9ff4e981a |
+| project_id | c685a5fa3e474261b678aeb59332ce0d |
+| user_id    | 818e335d15484101b6a2a69e5f9d4f61 |
++------------+----------------------------------+
+
 ```
