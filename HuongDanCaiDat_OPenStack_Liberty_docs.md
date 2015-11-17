@@ -675,46 +675,87 @@ lock_path = /var/lib/nova/tmp
 - Populate the Compute database
 su -s /bin/sh -c "nova-manage db sync" nova
 
-- Restart the Compute services
-
+- Khởi động lại các dịch vụ của NOVA trên Controller Node
+``sh
 service nova-api restart
 service nova-cert restart
 service nova-consoleauth restart
 service nova-scheduler restart
 service nova-conductor restart
 service nova-novncproxy restart
- 
-- remove the SQLite database file
+```
+
+- Xóa file SQLite mặc định
+```sh
 rm -f /var/lib/nova/nova.sqlite
+```
 
 #### Cài đặt trên NOVA trên COMPUTE NODE
 
 - Thiết lập IP
+```sh
+cat << EOF > /etc/network/interfaces
 
+# NIC loopback
+auto lo
+iface lo inet loopback
+
+# NIC MGNG
+auto eth0
+iface eth0 inet static
+address 10.10.10.121
+netmask 255.255.255.0
+
+# NIC EXTERNAL
+auto eth1
+iface eth1 inet static
+address 172.16.69.121
+netmask 255.255.255.0
+gateway 172.16.69.1
+dns-nameservers 8.8.8.8
+EOF
+
+```
 - Thiết lập hostname
 
-### Enable the OpenStack repository
+Cấu hình file /etc/hosts để phân giản IP cho các node
 
-apt-get install software-properties-common -y
-add-apt-repository cloud-archive:liberty -y
+```sh
+cat << EOF > /etc/hosts 
+127.0.0.1   controller localhost
+10.10.10.120    controller
+10.10.10.121    compute1
+
+EOF
+```
+
+Update và khởi động lại node `Compute node`
+
+```sh
+apt-get update -y && apt-get upgrade -y && apt-get dist-upgrade -y && init 6
+```
 
 
-- Upgrade the packages on your host
-apt-get -y update && apt-get -y dist-upgrade
+- Đăng nhập lại vào compute node và thực hiện các cài đặt tiếp theo
 
-- Install the OpenStack client
+
+- Cài đặt gói the OpenStack client
+```sh
 apt-get -y install python-openstackclient
-
-- Install the packages
+```
+- Caì đặt gói cho `nova-compute`
+```sh
 apt-get -y install nova-compute sysfsutils
+```
 
-- Sao lưu file config 
+- Sao lưu file config cho nova
+```sh
 cp /etc/nova/nova.conf /etc/nova/nova.conf.bak
+```
 
-- Edit the /etc/nova/nova.conf file and complete the following actions
-##############################
+- Sửa file `vi /etc/nova/nova.conf file` với nội dung dưới
 
-
+```sh
 [DEFAULT]
 dhcpbridge_flagfile=/etc/nova/nova.conf
 dhcpbridge=/usr/bin/nova-dhcpbridge
@@ -768,20 +809,35 @@ host = 10.10.10.120
 
 [oslo_concurrency]
 lock_path = /var/lib/nova/tmp
+```
 
-##############################
-
-- Restart the Compute service:
-
+- Khởi động lại `nova-compute` trên Controller
+```sh
 service nova-compute restart
+```
 
-- remove the SQLite database file
- rm -f /var/lib/nova/nova.sqlite
-
-- Verify operation NOVA, đứng trên node Controller thực hiện lệnh dưới.
-
+- Xóa file SQLite mặc định
+```sh
+rm -f /var/lib/nova/nova.sqlite
+```
+-  Kiểm tra lại dịch vụ của NOVA trên Controller 
+```sh
 nova service-list
+``
 
+- Kết quả sẽ như sau:
+```sh
++----+------------------+------------+----------+---------+-------+----------------------------+-----------------+
+| Id | Binary           | Host       | Zone     | Status  | State | Updated_at                 | Disabled Reason |
++----+------------------+------------+----------+---------+-------+----------------------------+-----------------+
+| 1  | nova-cert        | controller | internal | enabled | up    | 2015-11-17T10:00:41.000000 | -               |
+| 2  | nova-consoleauth | controller | internal | enabled | up    | 2015-11-17T10:00:44.000000 | -               |
+| 3  | nova-scheduler   | controller | internal | enabled | up    | 2015-11-17T10:00:44.000000 | -               |
+| 4  | nova-conductor   | controller | internal | enabled | up    | 2015-11-17T10:00:36.000000 | -               |
+| 6  | nova-compute     | compute1   | nova     | enabled | up    | 2015-11-17T10:00:44.000000 | -               |
++----+------------------+------------+----------+---------+-------+----------------------------+-----------------+
+
+```
 
 ##### NEUTRON ####
 ### NEUTRON Install and configure controller node
