@@ -59,9 +59,9 @@ netmask 255.255.255.0
 # NIC EXTERNAL
 auto eth1
 iface eth1 inet static
-address 172.16.69.120
+address 192.168.1.120
 netmask 255.255.255.0
-gateway 172.16.69.1
+gateway 192.168.1.1
 dns-nameservers 8.8.8.8
 
 
@@ -722,9 +722,9 @@ netmask 255.255.255.0
 # NIC EXTERNAL
 auto eth1
 iface eth1 inet static
-address 172.16.69.121
+address 192.168.1.121
 netmask 255.255.255.0
-gateway 172.16.69.1
+gateway 192.168.1.1
 dns-nameservers 8.8.8.8
 EOF
 
@@ -815,7 +815,7 @@ password = Welcome123
 enabled = True
 vncserver_listen = 0.0.0.0
 vncserver_proxyclient_address = $my_ip
-novncproxy_base_url = http://172.16.69.120:6080/vnc_auto.html
+novncproxy_base_url = http://192.168.1.120:6080/vnc_auto.html
 
 [glance]
 host = 10.10.10.120
@@ -1254,6 +1254,7 @@ password = Welcome123
 service nova-compute restart
 ```
 - Khởi động lại Linux bridge agent
+
 ```sh
 service neutron-plugin-linuxbridge-agent restart
 ```
@@ -1264,5 +1265,5 @@ service neutron-plugin-linuxbridge-agent restart
 apt-get -y install openstack-dashboard
 ```
 
-- Đăng nhập vào controller với IP `172.16.69.120/horizon`
+- Đăng nhập vào controller với IP `192.168.1.120/horizon`
 
