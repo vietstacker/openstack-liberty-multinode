@@ -852,20 +852,22 @@ nova service-list
 
 ```
 
-##### NEUTRON ####
-### NEUTRON Install and configure controller node
-####  Prerequisites
-- To create the database, complete these steps:
+
+### Cài đặt Neutron trên Controller Node
+- Tạo database cho Neutron
+```sh
 mysql -u root -pWelcome123
 
 CREATE DATABASE neutron;
 GRANT ALL PRIVILEGES ON neutron.* TO 'neutron'@'localhost' IDENTIFIED BY 'Welcome123';
 GRANT ALL PRIVILEGES ON neutron.* TO 'neutron'@'%' IDENTIFIED BY 'Welcome123';
 exit;
+```
 
-source admin.sh
 
-- Create the neutron user
+- Tạo user, gán role, endpoint cho neutron
+
+```sh
 
 openstack user create --domain default --password Welcome123 neutron
 
@@ -876,6 +878,8 @@ openstack service create --name neutron --description "OpenStack Networking" net
 openstack endpoint create --region RegionOne network public http://10.10.10.120:9696
 openstack endpoint create --region RegionOne network internal http://10.10.10.120:9696
 openstack endpoint create --region RegionOne network admin http://10.10.10.120:9696
+
+```
 
 - Cài đặt các thành phần cho NEUTRON trên Controller Node
 
@@ -893,9 +897,10 @@ cp /etc/neutron/neutron.conf /etc/neutron/neutron.conf.bak
 ```
 
 - Xóa file `/etc/neutron/neutron.conf`
+
 ```sh
 rm /etc/neutron/neutron.conf
-``
+```
 
 - Tạo file neutron.conf với lệnh `vi /etc/neutron/neutron.conf` chứa nội dung sau
 
@@ -990,10 +995,13 @@ enable_ipset = True
 ```
 
 #### Configure the Linux bridge agent
+- Sao lưu cấu hình cho file `linuxbridge_agent.ini `
 
+```sh
 cp /etc/neutron/plugins/ml2/linuxbridge_agent.ini /etc/neutron/plugins/ml2/linuxbridge_agent.ini.bak
 
-- nội dung file /etc/neutron/plugins/ml2/linuxbridge_agent.ini 
+- Sửa file linuxbridge_agent.ini  bằng lệnh `/etc/neutron/plugins/ml2/linuxbridge_agent.ini` với nội dung dưới
+
 
 ```sh
 
@@ -1016,11 +1024,19 @@ firewall_driver = neutron.agent.linux.iptables_firewall.IptablesFirewallDriver
 
 ```
 
-### Configure the layer-3 agent
+### Cấu hình cho layer-3 agent
 
+- Sao lưu file cấu hình
+```sh
 cp /etc/neutron/l3_agent.ini /etc/neutron/l3_agent.ini.bak
+```
 
-- Nội dung file  /etc/neutron/l3_agent.ini
+Xóa file `/etc/neutron/l3_agent.ini`
+```sh
+rm /etc/neutron/l3_agent.ini
+```
+-Sửa file  /etc/neutron/l3_agent.ini bằng lệnh `vi /etc/neutron/l3_agent.ini` với nội dung dưới
+
 
 ```sh
 
@@ -1034,10 +1050,13 @@ verbose = True
 
 ```
 
-#### Configure the DHCP agent
+#### Cấu hình  DHCP agent
+- Sao lưu file `dhcp_agent.ini` 
+```sh
 cp /etc/neutron/dhcp_agent.ini /etc/neutron/dhcp_agent.ini.bak
+```
 
-- Nội dung file  /etc/neutron/dhcp_agent.ini
+- Sửa file `dhcp_agent.ini` bằng lệnh `vi /etc/neutron/dhcp_agent.ini` với nội dung dưới
 
 ```sh
 
@@ -1062,9 +1081,10 @@ echo "dhcp-option-force=26,1450" > /etc/neutron/dnsmasq-neutron.conf
 - Cấu hình metadata agent
 - Sao lưu file ` cp /etc/neutron/metadata_agent.ini`
 
- cp /etc/neutron/metadata_agent.ini /etc/neutron/metadata_agent.ini.bak
+```sh
+cp /etc/neutron/metadata_agent.ini /etc/neutron/metadata_agent.ini.bak
+```
 
- 
 -Sửa file sau với lệnh `vi /etc/neutron/metadata_agent.ini`  chứa nội dung dưới
 
 ```sh
@@ -1214,7 +1234,7 @@ enable_security_group = True
 firewall_driver = neutron.agent.linux.iptables_firewall.IptablesFirewallDriver
 ```
 
-- Them vao duoi cung file  /etc/nova/nova.conf  tren node Compute
+- Thêm vào dưới cùng file `/etc/nova/nova.conf` trên Compute node với nội dung dưới
 
 ```sh
 [neutron]
