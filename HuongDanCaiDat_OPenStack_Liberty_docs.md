@@ -10,14 +10,17 @@
 - Chạy các lệnh dưới ngay sau khi cài đặt xong máy ảo.
 - Mô hình phải đảm bảo cấu hình đúng dải IP ở trên.
 
-Khai báo các gói để cài đặt OpenStack Liberty
+
+
+#### Node Controller
+
+- Khai báo các gói để cài đặt OpenStack Liberty
 
 ```sh
 apt-get -y install software-properties-common
 add-apt-repository -y cloud-archive:liberty 
 ```
 
-#### Node Controller
 ##### Thiết lập IP, hostname
 
 - Bạn có thể sửa IP phù hợp với máy bạn, tốt nhất là sử dụng theo IP mà chúng tôi hướng dẫn.
@@ -458,9 +461,9 @@ cp /etc/glance/glance-api.conf /etc/glance/glance-api.conf.bak
 rm /etc/glance/glance-api.conf 
 ```
 
-- Tạo file glan-api.conf với bằng lệnh `vi /etc/glance/glance-api.conf` với nội dung sau
-```sh
+- Tạo file `glance-api.conf` với bằng lệnh `vi /etc/glance/glance-api.conf` với nội dung sau
 
+```sh
 [DEFAULT]
 notification_driver = noop
 verbose = True
