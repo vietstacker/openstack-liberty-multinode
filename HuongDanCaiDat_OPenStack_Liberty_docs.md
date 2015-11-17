@@ -356,7 +356,7 @@ export OS_URL=http://10.10.10.164:35357/v3
 export OS_IDENTITY_API_VERSION=3
 ```
 
-Tạo service cho Keystone
+Tạo user, endpoint, role, tenant cho Keystone
 
 ```sh
 openstack service create --name keystone --description "OpenStack Identity" identity
