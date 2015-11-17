@@ -183,85 +183,31 @@ Cài đặt các gói dành cho Keystone
 apt-get -y install keystone apache2 libapache2-mod-wsgi memcached python-memcache
 ```
 
-- Sao lưu file cấu hình của keystone.
+Chỉnh sửa file cấu hình của keystone như dưới
+
 ```sh
-cp /etc/keystone/keystone.conf /etc/keystone/keystone.conf.bak
-```
+sed -i 's/#admin_token = ADMIN/admin_token = Welcome123/g' /etc/keystone/keystone.conf 
 
-- Xóa file keystone gốc 
-```sh
-rm /etc/keystone/keystone.conf
-```
+sed -i '/connection = .*/{s|sqlite:///.*|mysql+pymysql://'"keystone"':'Welcome123'@'10.10.10.164'/keystone|g}' /etc/keystone/keystone.conf 
 
+sed -i 's/#servers = localhost:11211/servers = localhost:11211/g' /etc/keystone/keystone.conf 
 
-- Tạo file keystone mới bằng lệnh `vi /etc/keystone/keystone.conf` chứa nội dung dưới.
-
-```sh 
-
-[DEFAULT]
-log_dir = /var/log/keystone
-
-admin_token = Welcome123
-public_bind_host = 10.10.10.120
-admin_bind_host = 10.10.10.120
-
-[assignment]
-[auth]
-[cache]
-[catalog]
-[cors]
-[cors.subdomain]
-[credential]
-[database]
-connection = mysql+pymysql://keystone:Welcome123@10.10.10.120/keystone
+sed -i 's/#provider = uuid/provider = uuid/g' /etc/keystone/keystone.conf 
 
 
-[domain_config]
-[endpoint_filter]
-[endpoint_policy]
-[eventlet_server]
-[eventlet_server_ssl]
-[federation]
-[fernet_tokens]
-[identity]
-[identity_mapping]
-[kvs]
-[ldap]
-[matchmaker_redis]
-[matchmaker_ring]
-[memcache]
-servers = localhost:11211
+sed -i 's/\[token\]/ \
+\[token\] \
+driver = memcache/g' /etc/keystone/keystone.conf 
+
+sed -i 's/\[revoke\]/ \
+\[revoke\] \
+driver = sql/g' /etc/keystone/keystone.conf 
 
 
-[oauth1]
-[os_inherit]
-[oslo_messaging_amqp]
-[oslo_messaging_qpid]
-[oslo_messaging_rabbit]
-[oslo_middleware]
-[oslo_policy]
-[paste_deploy]
-[policy]
-[resource]
-[revoke]
-driver = sql
+sed -i 's/#verbose = true/verbose = true/g' /etc/keystone/keystone.conf 
 
-[role]
-[saml]
-[signing]
-[ssl]
-[token]
-provider = uuid
-driver = memcache
-
-[tokenless_auth]
-[trust]
-[extra_headers]
-Distribution = Ubuntu
 
 ```
-
-
 
 Đồng bộ database cho keystone
 
@@ -269,16 +215,18 @@ Distribution = Ubuntu
 su -s /bin/sh -c "keystone-manage db_sync" keystone
 ```
 
-- Cấu hình apache cho Keystone
+Cấu hình apache cho Keystone
 
 ```sh
 echo "ServerName 10.10.10.164" > /etc/apache2/conf-available/servername.conf
+sudo a2enconf servername
 ```
 
 Tạo file `/etc/apache2/sites-available/wsgi-keystone.conf` với nội dung sau
 
 
 ```sh
+cat << EOF > /etc/apache2/sites-available/wsgi-keystone.conf
 Listen 5000
 Listen 35357
 
@@ -327,7 +275,8 @@ Listen 35357
         </IfVersion>
     </Directory>
 </VirtualHost>
-
+ 
+EOF
 ```
 
 Cấu hình virtual host cho keystone
@@ -360,37 +309,74 @@ Tạo service cho Keystone
 
 ```sh
 openstack service create --name keystone --description "OpenStack Identity" identity
-openstack endpoint create --region RegionOne identity public http://10.10.10.120:5000/v2.0
-openstack endpoint create --region RegionOne identity internal http://10.10.10.120:5000/v2.0
-openstack endpoint create --region RegionOne identity admin http://10.10.10.120:35357/v2.0
+```
 
+Tạo các endpoine cho keystone
+
+```sh
+openstack endpoint create --region RegionOne identity public http://10.10.10.164:5000/v2.0
+
+openstack endpoint create --region RegionOne identity internal http://10.10.10.164:5000/v2.0
+
+openstack endpoint create --region RegionOne identity admin http://10.10.10.164:35357/v2.0
+```
+
+Tạo project, user và role
+
+- Tạo project `admin`
+
+```sh
 openstack project create --domain default --description "Admin Project" admin
+```
+  
+- Tạo tài khoản `admin`
+
+```sh
 openstack user create  --domain default --password Welcome123 admin
+```
+  
+  
+- Tạo role `admin`
+
+```sh
 openstack role create admin
+```
+
+- Gán role `admin` cho tài khoản `admin `
+
+```sh
 openstack role add --project admin --user admin admin
+```
+
+
+- Tạo service tên là `serivce`
+
+```sh
 openstack project create --domain default --description "Service Project" service
+```
+  
+- Tạo project tên là `demo`
+
+```sh
 openstack project create --domain default --description "Demo Project" demo
+``` 
+  
+- Tạo user tên là `demo`
+
+```sh
 openstack user create --domain default --password Welcome123 demo
+```
+  
+- Tạo role tên là `user`
+
+```sh
 openstack role create user
+```
+
+- Gán tài khoản `demo` có role là `user`
+
+```sh
 openstack role add --project demo --user demo user
 ```
 
-unset OS_TOKEN OS_URL
 
-- Tạo file admin.sh với nội dung dưới bằng lệnh vi admin.sh
-
-```sh
-export OS_PROJECT_DOMAIN_ID=default
-export OS_USER_DOMAIN_ID=default
-export OS_PROJECT_NAME=admin
-export OS_TENANT_NAME=admin
-export OS_USERNAME=admin
-export OS_PASSWORD=Welcome123
-export OS_AUTH_URL=http://10.10.10.120:35357/v3
-export OS_IDENTITY_API_VERSION=3
-```
-
-- Phân quyền cho file `admin.sh`
-```sh
-chmod +x admin.sh
-```
