@@ -502,4 +502,651 @@ flavor = keystone
 [task]
 [taskflow_executor]
 ```
+- Sao lưu file `/etc/glance/glance-registry.conf`
+```sh
+cp /etc/glance/glance-registry.conf /etc/glance/glance-registry.conf.bak
+```
 
+- Xóa file gốc `/etc/glance/glance-registry.conf`
+```sh
+rm /etc/glance/glance-registry.conf
+```
+
+- Tạo file mới bằng lệnh `vi /etc/glance/glance-registry.conf` với nội dung sau:
+```
+
+[DEFAULT]
+notification_driver = noop
+verbose = True
+
+
+[database]
+connection = mysql+pymysql://glance:Welcome123@10.10.10.120/glance
+backend = sqlalchemy
+
+[glance_store]
+
+[keystone_authtoken]
+auth_uri = http://10.10.10.120:5000
+auth_url = http://10.10.10.120:35357
+auth_plugin = password
+project_domain_id = default
+user_domain_id = default
+project_name = service
+username = glance
+password = Welcome123
+
+
+[matchmaker_redis]
+[matchmaker_ring]
+[oslo_messaging_amqp]
+[oslo_messaging_qpid]
+[oslo_messaging_rabbit]
+[oslo_policy]
+[paste_deploy]
+flavor = keystone
+
+```
+
+- Đồng bộ database cho Glance
+```sh
+su -s /bin/sh -c "glance-manage db_sync" glance
+```
+
+- Xóa file SQLite mặc định
+```sh
+rm -f /var/lib/glance/glance.sqlite
+```
+
+- Khai báo thêm biến môi trường cho Glance
+```sh
+echo "export OS_IMAGE_API_VERSION=2" | tee -a admin.sh
+source admin.sh
+```
+
+- Tải image `cirros` và up image cho glance
+```sh
+wget http://download.cirros-cloud.net/0.3.4/cirros-0.3.4-x86_64-disk.img
+
+glance image-create --name "cirros" \
+--file cirros-0.3.4-x86_64-disk.img \
+--disk-format qcow2 --container-format bare \
+--visibility public --progress
+```
+
+#### Cài đặt NOVA
+#### Cài đặt NOVA trên CONTROLLER
+##### Prerequisites
+- To create the database, complete these steps
+
+mysql -u root -pWelcome123
+
+CREATE DATABASE nova;
+GRANT ALL PRIVILEGES ON nova.* TO 'nova'@'localhost' IDENTIFIED BY 'Welcome123';
+GRANT ALL PRIVILEGES ON nova.* TO 'nova'@'%' IDENTIFIED BY 'Welcome123';
+exit
+
+source admin.sh
+
+- To create the service credentials, complete these steps
+
+openstack user create --domain default --password Welcome123 nova
+
+openstack role add --project service --user nova admin
+
+
+openstack service create --name nova --description "OpenStack Compute" compute
+
+openstack endpoint create --region RegionOne compute public http://10.10.10.120:8774/v2/%\(tenant_id\)s
+openstack endpoint create --region RegionOne compute internal http://10.10.10.120:8774/v2/%\(tenant_id\)s
+openstack endpoint create --region RegionOne compute admin http://10.10.10.120:8774/v2/%\(tenant_id\)s
+
+
+
+#### Install and configure components Nova
+- Install the packages
+apt-get -y install nova-api nova-cert nova-conductor nova-consoleauth nova-novncproxy nova-scheduler python-novaclient
+
+- Edit the /etc/nova/nova.conf file and complete the following actions:
+
+cp /etc/nova/nova.conf  /etc/nova/nova.conf.bak
+cat  /etc/nova/nova.conf.bak | grep -v ^# | grep -v ^$
+
+########################################
+[DEFAULT]
+
+rpc_backend = rabbit
+auth_strategy = keystone
+
+dhcpbridge_flagfile=/etc/nova/nova.conf
+dhcpbridge=/usr/bin/nova-dhcpbridge
+logdir=/var/log/nova
+state_path=/var/lib/nova
+lock_path=/var/lock/nova
+force_dhcp_release=True
+libvirt_use_virtio_for_bridges=True
+ec2_private_dns_show_ip=True
+api_paste_config=/etc/nova/api-paste.ini
+enabled_apis=ec2,osapi_compute,metadata
+
+my_ip = 10.10.10.120
+
+network_api_class = nova.network.neutronv2.api.API
+security_group_api = neutron
+linuxnet_interface_driver = nova.network.linux_net.NeutronLinuxBridgeInterfaceDriver
+firewall_driver = nova.virt.firewall.NoopFirewallDriver
+
+enabled_apis=osapi_compute,metadata
+verbose = True
+
+
+[database]
+connection = mysql+pymysql://nova:Welcome123@10.10.10.120/nova
+
+[oslo_messaging_rabbit]
+rabbit_host = 10.10.10.120
+rabbit_userid = openstack
+rabbit_password = Welcome123
+
+[keystone_authtoken]
+auth_uri = http://10.10.10.120:5000
+auth_url = http://10.10.10.120:35357
+auth_plugin = password
+project_domain_id = default
+user_domain_id = default
+project_name = service
+username = nova
+password = Welcome123
+
+[vnc]
+vncserver_listen = $my_ip
+vncserver_proxyclient_address = $my_ip
+
+[glance]
+host = 10.10.10.120
+
+[oslo_concurrency]
+lock_path = /var/lib/nova/tmp
+
+########################################
+
+- Populate the Compute database
+su -s /bin/sh -c "nova-manage db sync" nova
+
+- Restart the Compute services
+
+service nova-api restart
+service nova-cert restart
+service nova-consoleauth restart
+service nova-scheduler restart
+service nova-conductor restart
+service nova-novncproxy restart
+ 
+- remove the SQLite database file
+rm -f /var/lib/nova/nova.sqlite
+
+#### Cài đặt trên NOVA trên COMPUTE NODE
+
+- Thiết lập IP
+
+- Thiết lập hostname
+
+### Enable the OpenStack repository
+
+apt-get install software-properties-common -y
+add-apt-repository cloud-archive:liberty -y
+
+
+- Upgrade the packages on your host
+apt-get -y update && apt-get -y dist-upgrade
+
+- Install the OpenStack client
+apt-get -y install python-openstackclient
+
+- Install the packages
+apt-get -y install nova-compute sysfsutils
+
+- Sao lưu file config 
+cp /etc/nova/nova.conf /etc/nova/nova.conf.bak
+
+- Edit the /etc/nova/nova.conf file and complete the following actions
+##############################
+
+
+[DEFAULT]
+dhcpbridge_flagfile=/etc/nova/nova.conf
+dhcpbridge=/usr/bin/nova-dhcpbridge
+logdir=/var/log/nova
+state_path=/var/lib/nova
+lock_path=/var/lock/nova
+force_dhcp_release=True
+libvirt_use_virtio_for_bridges=True
+verbose=True
+ec2_private_dns_show_ip=True
+api_paste_config=/etc/nova/api-paste.ini
+enabled_apis=ec2,osapi_compute,metadata
+
+rpc_backend = rabbit
+auth_strategy = keystone
+my_ip = 10.10.10.121
+
+network_api_class = nova.network.neutronv2.api.API
+security_group_api = neutron
+linuxnet_interface_driver = nova.network.linux_net.NeutronLinuxBridgeInterfaceDriver
+firewall_driver = nova.virt.firewall.NoopFirewallDriver
+
+verbose = True
+
+
+[oslo_messaging_rabbit]
+rabbit_host = 10.10.10.120
+rabbit_userid = openstack
+rabbit_password = Welcome123
+
+[keystone_authtoken]
+auth_uri = http://10.10.10.120:5000
+auth_url = http://10.10.10.120:35357
+auth_plugin = password
+project_domain_id = default
+user_domain_id = default
+project_name = service
+username = nova
+password = Welcome123
+
+
+
+[vnc]
+enabled = True
+vncserver_listen = 0.0.0.0
+vncserver_proxyclient_address = $my_ip
+novncproxy_base_url = http://172.16.69.120:6080/vnc_auto.html
+
+[glance]
+host = 10.10.10.120
+
+[oslo_concurrency]
+lock_path = /var/lib/nova/tmp
+
+##############################
+
+- Restart the Compute service:
+
+service nova-compute restart
+
+- remove the SQLite database file
+ rm -f /var/lib/nova/nova.sqlite
+
+- Verify operation NOVA, đứng trên node Controller thực hiện lệnh dưới.
+
+nova service-list
+
+
+##### NEUTRON ####
+### NEUTRON Install and configure controller node
+####  Prerequisites
+- To create the database, complete these steps:
+mysql -u root -pWelcome123
+
+CREATE DATABASE neutron;
+GRANT ALL PRIVILEGES ON neutron.* TO 'neutron'@'localhost' IDENTIFIED BY 'Welcome123';
+GRANT ALL PRIVILEGES ON neutron.* TO 'neutron'@'%' IDENTIFIED BY 'Welcome123';
+exit;
+
+source admin.sh
+
+- Create the neutron user
+
+openstack user create --domain default --password Welcome123 neutron
+
+openstack role add --project service --user neutron admin
+
+openstack service create --name neutron --description "OpenStack Networking" network
+
+openstack endpoint create --region RegionOne network public http://10.10.10.120:9696
+openstack endpoint create --region RegionOne network internal http://10.10.10.120:9696
+openstack endpoint create --region RegionOne network admin http://10.10.10.120:9696
+
+- Install and configure the Networking components on the controller node (cài theo option2)
+
+apt-get -y install neutron-server neutron-plugin-ml2 \
+neutron-plugin-linuxbridge-agent neutron-l3-agent neutron-dhcp-agent \
+neutron-metadata-agent python-neutronclient
+
+- Sao lưu file cấu hình
+
+cp /etc/neutron/neutron.conf /etc/neutron/neutron.conf.bak
+cat /etc/neutron/neutron.conf.bak | grep -v ^# | grep -v ^$ > /etc/neutron/neutron.conf
+
+- Nội dung file neutron như sau:
+
+[DEFAULT]
+core_plugin = ml2
+service_plugins = router
+allow_overlapping_ips = True
+rpc_backend = rabbit
+
+auth_strategy = keystone
+
+notify_nova_on_port_status_changes = True
+notify_nova_on_port_data_changes = True
+nova_url = http://10.10.10.120:8774/v2
+
+verbose = True
+
+
+[matchmaker_redis]
+[matchmaker_ring]
+[quotas]
+[agent]
+root_helper = sudo /usr/bin/neutron-rootwrap /etc/neutron/rootwrap.conf
+
+[keystone_authtoken]
+auth_uri = http://10.10.10.120:5000
+auth_url = http://10.10.10.120:35357
+auth_plugin = password
+project_domain_id = default
+user_domain_id = default
+project_name = service
+username = neutron
+password = Welcome123
+
+
+[database]
+connection = mysql+pymysql://neutron:Welcome123@10.10.10.120/neutron
+
+
+[nova]
+auth_url = http://10.10.10.120:35357
+auth_plugin = password
+project_domain_id = default
+user_domain_id = default
+region_name = RegionOne
+project_name = service
+username = nova
+password = Welcome123
+
+[oslo_concurrency]
+lock_path = $state_path/lock
+[oslo_policy]
+[oslo_messaging_amqp]
+[oslo_messaging_qpid]
+
+[oslo_messaging_rabbit]
+rabbit_host = 10.10.10.120
+rabbit_userid = openstack
+rabbit_password = Welcome123
+
+[qos]
+
+### Configure the Modular Layer 2 (ML2) plug-in
+
+cp /etc/neutron/plugins/ml2/ml2_conf.ini  /etc/neutron/plugins/ml2/ml2_conf.ini.bak
+
+- Sửa file /etc/neutron/plugins/ml2/ml2_conf.ini  với nội dung sau
+
+#######################################
+[ml2]
+tenant_network_types = vxlan
+type_drivers = flat,vlan,vxlan
+mechanism_drivers = linuxbridge,l2population
+extension_drivers = port_security
+
+
+[ml2_type_flat]
+flat_networks = public
+
+[ml2_type_vlan]
+
+[ml2_type_gre]
+[ml2_type_vxlan]
+vni_ranges = 1:1000
+
+[ml2_type_geneve]
+[securitygroup]
+enable_ipset = True
+
+#######################################
+
+#### Configure the Linux bridge agent
+
+cp /etc/neutron/plugins/ml2/linuxbridge_agent.ini /etc/neutron/plugins/ml2/linuxbridge_agent.ini.bak
+
+- nội dung file /etc/neutron/plugins/ml2/linuxbridge_agent.ini 
+
+#######################################
+
+[linux_bridge]
+physical_interface_mappings = public:eth1
+
+[vxlan]
+enable_vxlan = True
+local_ip = 10.10.10.120
+l2_population = True
+
+
+[agent]
+prevent_arp_spoofing = True
+
+
+[securitygroup]
+enable_security_group = True
+firewall_driver = neutron.agent.linux.iptables_firewall.IptablesFirewallDriver
+
+
+#######################################
+### Configure the layer-3 agent
+
+cp /etc/neutron/l3_agent.ini /etc/neutron/l3_agent.ini.bak
+
+- Nội dung file  /etc/neutron/l3_agent.ini
+
+#######################################
+
+[DEFAULT]
+interface_driver = neutron.agent.linux.interface.BridgeInterfaceDriver
+external_network_bridge =
+verbose = True
+
+
+[AGENT]
+
+#######################################
+
+#### Configure the DHCP agent
+cp /etc/neutron/dhcp_agent.ini /etc/neutron/dhcp_agent.ini.bak
+
+- Nội dung file  /etc/neutron/dhcp_agent.ini
+
+#######################################
+
+[DEFAULT]
+interface_driver = neutron.agent.linux.interface.BridgeInterfaceDriver
+dhcp_driver = neutron.agent.linux.dhcp.Dnsmasq
+enable_isolated_metadata = True
+
+verbose = True
+dnsmasq_config_file = /etc/neutron/dnsmasq-neutron.conf
+
+[AGENT]
+
+#######################################
+
+
+- Tao file /etc/neutron/dnsmasq-neutron.conf voi noi dung sau
+
+echo "dhcp-option-force=26,1450" > /etc/neutron/dnsmasq-neutron.conf 
+
+### Configure the metadata agent
+
+ cp /etc/neutron/metadata_agent.ini /etc/neutron/metadata_agent.ini.bak
+
+ 
+- Sua file  /etc/neutron/metadata_agent.ini  voi noi dung
+
+#######################################
+[DEFAULT]
+auth_uri = http://10.10.10.120:5000
+auth_url = http://10.10.10.120:35357
+auth_region = RegionOne
+auth_plugin = password
+project_domain_id = default
+user_domain_id = default
+project_name = service
+username = neutron
+password = Welcome123
+
+nova_metadata_ip = 10.10.10.120
+
+metadata_proxy_shared_secret = Welcome123
+verbose = True
+
+#######################################
+
+- Thêm vào file /etc/nova/nova.conf  trên node Controller đoạn dưới cùng dưới
+
+[neutron]
+url = http://10.10.10.120:9696
+auth_url = http://10.10.10.120:35357
+auth_plugin = password
+project_domain_id = default
+user_domain_id = default
+region_name = RegionOne
+project_name = service
+username = neutron
+password = Welcome123
+
+service_metadata_proxy = True
+metadata_proxy_shared_secret = Welcome123
+
+
+### Populate the database:
+
+su -s /bin/sh -c "neutron-db-manage --config-file /etc/neutron/neutron.conf \
+  --config-file /etc/neutron/plugins/ml2/ml2_conf.ini upgrade head" neutron
+  
+- Restart the Compute API service:
+service nova-api restart
+
+- Restart the Networking services
+
+service neutron-server restart
+service neutron-plugin-linuxbridge-agent restart
+service neutron-dhcp-agent restart
+service neutron-metadata-agent restart
+
+- restart the layer-3 service
+service neutron-l3-agent restart
+
+-  remove the SQLite database file:
+rm -f /var/lib/neutron/neutron.sqlite
+
+####  NEUTRON Install and configure compute node
+- Install the components
+apt-get -y install neutron-plugin-linuxbridge-agent
+
+
+- Sao luu file /etc/neutron/neutron.conf
+cp /etc/neutron/neutron.conf /etc/neutron/neutron.conf.bak
+
+-  Sửa file  /etc/neutron/neutron.conf co noi dung sau
+
+#######################################
+
+[DEFAULT]
+core_plugin = ml2
+
+rpc_backend = rabbit
+auth_strategy = keystone
+verbose = True
+
+
+
+[matchmaker_redis]
+[matchmaker_ring]
+[quotas]
+[agent]
+root_helper = sudo /usr/bin/neutron-rootwrap /etc/neutron/rootwrap.conf
+
+[keystone_authtoken]
+auth_uri = http://10.10.10.120:5000
+auth_url = http://10.10.10.120:35357
+auth_plugin = password
+project_domain_id = default
+user_domain_id = default
+project_name = service
+username = neutron
+password = Welcome123
+
+
+[database]
+connection = sqlite:////var/lib/neutron/neutron.sqlite
+
+[nova]
+[oslo_concurrency]
+lock_path = $state_path/lock
+[oslo_policy]
+[oslo_messaging_amqp]
+[oslo_messaging_qpid]
+
+[oslo_messaging_rabbit]
+rabbit_host = 10.10.10.120
+rabbit_userid = openstack
+rabbit_password = Welcome123
+
+[qos]
+
+#######################################
+
+### Configure the Linux bridge agent
+
+cp /etc/neutron/plugins/ml2/linuxbridge_agent.ini /etc/neutron/plugins/ml2/linuxbridge_agent.ini.bak
+
+- Edit the /etc/neutron/plugins/ml2/linuxbridge_agent.ini 
+
+#######################################
+
+[linux_bridge]
+physical_interface_mappings = public:eth1
+
+[vxlan]
+enable_vxlan = True
+local_ip = 10.10.10.121
+l2_population = True
+
+[agent]
+prevent_arp_spoofing = True
+
+[securitygroup]
+enable_security_group = True
+firewall_driver = neutron.agent.linux.iptables_firewall.IptablesFirewallDriver
+
+#######################################
+
+- Them vao duoi cung file  /etc/nova/nova.conf  tren node Compute
+
+#######################################
+[neutron]
+url = http://10.10.10.120:9696
+auth_url = http://10.10.10.120:35357
+auth_plugin = password
+project_domain_id = default
+user_domain_id = default
+region_name = RegionOne
+project_name = service
+username = neutron
+password = Welcome123
+######################################
+
+- Restart the Compute service:
+
+service nova-compute restart
+
+- Restart the Linux bridge agent:
+
+service neutron-plugin-linuxbridge-agent restart
+
+
+
+#### Cai dat dashboad tren CONTROLLER ####
+- To install the dashboard components
+apt-get -y install openstack-dashboard
