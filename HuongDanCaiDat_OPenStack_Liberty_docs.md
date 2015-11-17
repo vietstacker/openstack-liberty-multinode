@@ -3,6 +3,8 @@
 ### Mô hình cài đặt
 - Lưu ý:
  - Sử dụng mô hình cài đặt thu gọn gồm 1 node Controller và nhiều node Compute
+ 
+![Topo-liberty](/images/Topo-OpenStack-Liberty.jpg)
 
 ### Các thiết lập cơ bản
 
@@ -806,19 +808,29 @@ openstack endpoint create --region RegionOne network public http://10.10.10.120:
 openstack endpoint create --region RegionOne network internal http://10.10.10.120:9696
 openstack endpoint create --region RegionOne network admin http://10.10.10.120:9696
 
-- Install and configure the Networking components on the controller node (cài theo option2)
+- Cài đặt các thành phần cho NEUTRON trên Controller Node
 
+```sh
 apt-get -y install neutron-server neutron-plugin-ml2 \
 neutron-plugin-linuxbridge-agent neutron-l3-agent neutron-dhcp-agent \
 neutron-metadata-agent python-neutronclient
+```
 
 - Sao lưu file cấu hình
 
+```sh
 cp /etc/neutron/neutron.conf /etc/neutron/neutron.conf.bak
-cat /etc/neutron/neutron.conf.bak | grep -v ^# | grep -v ^$ > /etc/neutron/neutron.conf
 
-- Nội dung file neutron như sau:
+```
 
+- Xóa file `/etc/neutron/neutron.conf`
+```sh
+rm /etc/neutron/neutron.conf
+``
+
+- Tạo file neutron.conf với lệnh `vi /etc/neutron/neutron.conf` chứa nội dung sau
+
+```sh
 [DEFAULT]
 core_plugin = ml2
 service_plugins = router
@@ -832,7 +844,6 @@ notify_nova_on_port_data_changes = True
 nova_url = http://10.10.10.120:8774/v2
 
 verbose = True
-
 
 [matchmaker_redis]
 [matchmaker_ring]
@@ -877,14 +888,16 @@ rabbit_userid = openstack
 rabbit_password = Welcome123
 
 [qos]
+```
 
-### Configure the Modular Layer 2 (ML2) plug-in
-
+- Cấu hình cho (ML2) plug-in
+```sh
 cp /etc/neutron/plugins/ml2/ml2_conf.ini  /etc/neutron/plugins/ml2/ml2_conf.ini.bak
+```
 
 - Sửa file /etc/neutron/plugins/ml2/ml2_conf.ini  với nội dung sau
 
-#######################################
+```
 [ml2]
 tenant_network_types = vxlan
 type_drivers = flat,vlan,vxlan
@@ -905,7 +918,7 @@ vni_ranges = 1:1000
 [securitygroup]
 enable_ipset = True
 
-#######################################
+```
 
 #### Configure the Linux bridge agent
 
@@ -913,7 +926,7 @@ cp /etc/neutron/plugins/ml2/linuxbridge_agent.ini /etc/neutron/plugins/ml2/linux
 
 - nội dung file /etc/neutron/plugins/ml2/linuxbridge_agent.ini 
 
-#######################################
+```sh
 
 [linux_bridge]
 physical_interface_mappings = public:eth1
@@ -932,15 +945,15 @@ prevent_arp_spoofing = True
 enable_security_group = True
 firewall_driver = neutron.agent.linux.iptables_firewall.IptablesFirewallDriver
 
+```
 
-#######################################
 ### Configure the layer-3 agent
 
 cp /etc/neutron/l3_agent.ini /etc/neutron/l3_agent.ini.bak
 
 - Nội dung file  /etc/neutron/l3_agent.ini
 
-#######################################
+```sh
 
 [DEFAULT]
 interface_driver = neutron.agent.linux.interface.BridgeInterfaceDriver
@@ -950,14 +963,14 @@ verbose = True
 
 [AGENT]
 
-#######################################
+```
 
 #### Configure the DHCP agent
 cp /etc/neutron/dhcp_agent.ini /etc/neutron/dhcp_agent.ini.bak
 
 - Nội dung file  /etc/neutron/dhcp_agent.ini
 
-#######################################
+```sh
 
 [DEFAULT]
 interface_driver = neutron.agent.linux.interface.BridgeInterfaceDriver
@@ -968,23 +981,25 @@ verbose = True
 dnsmasq_config_file = /etc/neutron/dnsmasq-neutron.conf
 
 [AGENT]
+```
 
-#######################################
 
+- Tạo file `vi /etc/neutron/dnsmasq-neutron.conf` với nội dung sau:
 
-- Tao file /etc/neutron/dnsmasq-neutron.conf voi noi dung sau
-
+```sh
 echo "dhcp-option-force=26,1450" > /etc/neutron/dnsmasq-neutron.conf 
+```
 
-### Configure the metadata agent
+- Cấu hình metadata agent
+- Sao lưu file ` cp /etc/neutron/metadata_agent.ini`
 
  cp /etc/neutron/metadata_agent.ini /etc/neutron/metadata_agent.ini.bak
 
  
-- Sua file  /etc/neutron/metadata_agent.ini  voi noi dung
+-Sửa file sau với lệnh `vi /etc/neutron/metadata_agent.ini`  chứa nội dung dưới
 
-#######################################
-[DEFAULT]
+```sh
+DEFAULT]
 auth_uri = http://10.10.10.120:5000
 auth_url = http://10.10.10.120:35357
 auth_region = RegionOne
@@ -999,11 +1014,11 @@ nova_metadata_ip = 10.10.10.120
 
 metadata_proxy_shared_secret = Welcome123
 verbose = True
-
-#######################################
+```
 
 - Thêm vào file /etc/nova/nova.conf  trên node Controller đoạn dưới cùng dưới
 
+```
 [neutron]
 url = http://10.10.10.120:9696
 auth_url = http://10.10.10.120:35357
@@ -1017,40 +1032,48 @@ password = Welcome123
 
 service_metadata_proxy = True
 metadata_proxy_shared_secret = Welcome123
+```
 
+- Đồng bộ database cho NVOA
 
-### Populate the database:
-
+```sh
 su -s /bin/sh -c "neutron-db-manage --config-file /etc/neutron/neutron.conf \
   --config-file /etc/neutron/plugins/ml2/ml2_conf.ini upgrade head" neutron
-  
-- Restart the Compute API service:
+```
+
+- Khởi động lại `nova-api`
+```sh
 service nova-api restart
+```
 
-- Restart the Networking services
+- Khởi động lại các dịch vụ của NEUTRON trên CONTROLLER NODE
 
+```sh
 service neutron-server restart
 service neutron-plugin-linuxbridge-agent restart
 service neutron-dhcp-agent restart
 service neutron-metadata-agent restart
-
-- restart the layer-3 service
 service neutron-l3-agent restart
+```
 
--  remove the SQLite database file:
+-  Xóa file SQLite mặc định của OpenStack
+```sh
 rm -f /var/lib/neutron/neutron.sqlite
-
-####  NEUTRON Install and configure compute node
-- Install the components
+```
+#### Cài đặt thành phần của neutron trên COMPUTE NODE
+- Cài đặt `linuxbridge-agent` trên node Compute
+```sh
 apt-get -y install neutron-plugin-linuxbridge-agent
+```
 
-
-- Sao luu file /etc/neutron/neutron.conf
+- Sao lưu file  `/etc/neutron/neutron.conf`
+```sh
 cp /etc/neutron/neutron.conf /etc/neutron/neutron.conf.bak
+```
 
--  Sửa file  /etc/neutron/neutron.conf co noi dung sau
+-  Sửa file với lệnh `vi /etc/neutron/neutron.conf`  chứa nội dung sau.
 
-#######################################
+```sh
 
 [DEFAULT]
 core_plugin = ml2
@@ -1058,8 +1081,6 @@ core_plugin = ml2
 rpc_backend = rabbit
 auth_strategy = keystone
 verbose = True
-
-
 
 [matchmaker_redis]
 [matchmaker_ring]
@@ -1079,7 +1100,7 @@ password = Welcome123
 
 
 [database]
-connection = sqlite:////var/lib/neutron/neutron.sqlite
+# connection = sqlite:////var/lib/neutron/neutron.sqlite
 
 [nova]
 [oslo_concurrency]
@@ -1095,15 +1116,18 @@ rabbit_password = Welcome123
 
 [qos]
 
-#######################################
+```
 
 ### Configure the Linux bridge agent
 
+- Sao lưu file `/etc/neutron/plugins/ml2/linuxbridge_agent.ini`
+```sh
 cp /etc/neutron/plugins/ml2/linuxbridge_agent.ini /etc/neutron/plugins/ml2/linuxbridge_agent.ini.bak
+```
 
-- Edit the /etc/neutron/plugins/ml2/linuxbridge_agent.ini 
+- Sửa file bằng lệnh `vi /etc/neutron/plugins/ml2/linuxbridge_agent.ini` với nội dung sau:
 
-#######################################
+```sh
 
 [linux_bridge]
 physical_interface_mappings = public:eth1
@@ -1119,12 +1143,11 @@ prevent_arp_spoofing = True
 [securitygroup]
 enable_security_group = True
 firewall_driver = neutron.agent.linux.iptables_firewall.IptablesFirewallDriver
-
-#######################################
+```
 
 - Them vao duoi cung file  /etc/nova/nova.conf  tren node Compute
 
-#######################################
+```sh
 [neutron]
 url = http://10.10.10.120:9696
 auth_url = http://10.10.10.120:35357
@@ -1135,18 +1158,22 @@ region_name = RegionOne
 project_name = service
 username = neutron
 password = Welcome123
-######################################
+```
 
-- Restart the Compute service:
-
+- Khởi động lại nova-compute
+```sh
 service nova-compute restart
-
-- Restart the Linux bridge agent:
-
+```
+- Khởi động lại Linux bridge agent
+```sh
 service neutron-plugin-linuxbridge-agent restart
+```
 
+##### Cai dat dashboad tren CONTROLLER
 
-
-#### Cai dat dashboad tren CONTROLLER ####
-- To install the dashboard components
+```sh
 apt-get -y install openstack-dashboard
+```
+
+- Đăng nhập vào controller với IP `172.16.69.120/horizon`
+
