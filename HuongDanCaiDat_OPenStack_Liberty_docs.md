@@ -579,19 +579,21 @@ glance image-create --name "cirros" \
 #### Cài đặt NOVA
 #### Cài đặt NOVA trên CONTROLLER
 ##### Prerequisites
-- To create the database, complete these steps
+- Tạo database cho NOVA
 
+```sh
 mysql -u root -pWelcome123
 
 CREATE DATABASE nova;
 GRANT ALL PRIVILEGES ON nova.* TO 'nova'@'localhost' IDENTIFIED BY 'Welcome123';
 GRANT ALL PRIVILEGES ON nova.* TO 'nova'@'%' IDENTIFIED BY 'Welcome123';
 exit
+```
 
-source admin.sh
 
-- To create the service credentials, complete these steps
+- Tạo user, gán role, endpoint cho nova
 
+```sh
 openstack user create --domain default --password Welcome123 nova
 
 openstack role add --project service --user nova admin
@@ -603,18 +605,26 @@ openstack endpoint create --region RegionOne compute public http://10.10.10.120:
 openstack endpoint create --region RegionOne compute internal http://10.10.10.120:8774/v2/%\(tenant_id\)s
 openstack endpoint create --region RegionOne compute admin http://10.10.10.120:8774/v2/%\(tenant_id\)s
 
+```
 
-
-#### Install and configure components Nova
-- Install the packages
+#### Cài đặt các gói nova trên Controller
+```sh
 apt-get -y install nova-api nova-cert nova-conductor nova-consoleauth nova-novncproxy nova-scheduler python-novaclient
+```
 
-- Edit the /etc/nova/nova.conf file and complete the following actions:
+- Sao lưu file `/etc/nova/nova.conf`
 
+```sh
 cp /etc/nova/nova.conf  /etc/nova/nova.conf.bak
-cat  /etc/nova/nova.conf.bak | grep -v ^# | grep -v ^$
+```
 
-########################################
+- Xóa file gốc 
+```sh
+rm /etc/nova/nova.conf
+```
+
+- Tạo file nova.conf với lệnh `vi /etc/nova/nova.conf` với nội dung sau:
+```sh
 [DEFAULT]
 
 rpc_backend = rabbit
@@ -670,10 +680,13 @@ host = 10.10.10.120
 [oslo_concurrency]
 lock_path = /var/lib/nova/tmp
 
-########################################
+```
 
-- Populate the Compute database
+- Đồng bộ database cho NOVA
+
+```sh
 su -s /bin/sh -c "nova-manage db sync" nova
+```
 
 - Khởi động lại các dịch vụ của NOVA trên Controller Node
 ``sh
