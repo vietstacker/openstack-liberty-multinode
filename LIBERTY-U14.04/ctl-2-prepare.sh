@@ -14,7 +14,7 @@ rm /etc/ntp.conf
 cat /etc/ntp.conf.bka | grep -v ^# | grep -v ^$ >> /etc/ntp.conf
 
 
-## Config NTP in KILO
+## Config NTP in LIBERTY
 sed -i 's/server ntp.ubuntu.com/ \
 server 0.vn.pool.ntp.org iburst \
 server 1.asia.pool.ntp.org iburst \
@@ -71,6 +71,8 @@ character-set-server = utf8
 
 EOF
 
+sleep 5
+echo "Restart MYSQL"
 service mysql restart
 
 
