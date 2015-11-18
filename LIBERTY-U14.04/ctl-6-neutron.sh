@@ -264,3 +264,40 @@ service neutron-metadata-agent restart
 service neutron-l3-agent restart
 
 rm -f /var/lib/neutron/neutron.sqlite
+
+echo "Setup IP for PUBLIC interface"
+sleep 5
+
+
+cat << EOF >> /etc/network/interfaces
+#Assign IP for Controller node
+
+# LOOPBACK NET 
+auto lo
+iface lo inet loopback
+
+# MGNT NETWORK
+auto eth0
+iface eth0 inet static
+address $CON_MGNT_IP
+netmask $NETMASK_ADD_MGNT
+
+
+# EXT NETWORK
+auto eth1:0
+iface eth1:0 inet static
+address $CON_EXT_IP
+netmask $NETMASK_ADD_EXT
+gateway $GATEWAY_IP_EXT
+dns-nameservers 8.8.8.8
+
+
+auto eth1
+iface  eth1 inet manual
+up ip link set dev $IFACE up
+down ip link set dev $IFACE down
+
+EOF
+
+ifdown -a && ifup -a
+
