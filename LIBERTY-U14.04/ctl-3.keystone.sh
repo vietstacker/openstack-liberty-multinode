@@ -3,13 +3,13 @@
 source config.cfg
 
 echo "Create Database for Keystone"
-mysql -u root -p$MYSQL_PASS
+cat << EOF | mysql -uroot -p$MYSQL_PASS
 
 CREATE DATABASE keystone;
 GRANT ALL PRIVILEGES ON keystone.* TO 'keystone'@'localhost' IDENTIFIED BY 'Welcome123';
 GRANT ALL PRIVILEGES ON keystone.* TO 'keystone'@'%' IDENTIFIED BY 'Welcome123';
-exit;
-
+FLUSH PRIVILEGES;
+EOF
 
 echo "##### Install keystone #####"
  
