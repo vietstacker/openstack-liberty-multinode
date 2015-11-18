@@ -6,8 +6,8 @@ echo "Create Database for Keystone"
 
 cat << EOF | mysql -uroot -p$MYSQL_PASS
 CREATE DATABASE keystone;
-GRANT ALL PRIVILEGES ON keystone.* TO 'keystone'@'localhost' IDENTIFIED BY 'Welcome123';
-GRANT ALL PRIVILEGES ON keystone.* TO 'keystone'@'%' IDENTIFIED BY 'Welcome123';
+GRANT ALL PRIVILEGES ON keystone.* TO 'keystone'@'localhost' IDENTIFIED BY '$KEYSTONE_DBPASS';
+GRANT ALL PRIVILEGES ON keystone.* TO 'keystone'@'%' IDENTIFIED BY '$KEYSTONE_DBPASS';
 FLUSH PRIVILEGES;
 EOF
 
@@ -40,7 +40,7 @@ admin_bind_host = $CON_MGNT_IP
 [cors.subdomain]
 [credential]
 [database]
-connection = mysql+pymysql://keystone:$KEYSTONE_PASS@$CON_MGNT_IP/keystone
+connection = mysql+pymysql://keystone:$KEYSTONE_DBPASS@$CON_MGNT_IP/keystone
 
 
 [domain_config]
