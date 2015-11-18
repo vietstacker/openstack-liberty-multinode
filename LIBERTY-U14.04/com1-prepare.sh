@@ -4,7 +4,7 @@
 source config.cfg
 
 #
-echo "##### Install python openstack client ##### 
+echo "##### Install python openstack client ##### "
 apt-get -y install python-openstackclient
 
 echo "##### Install NTP ##### "
@@ -32,7 +32,8 @@ sed -i 's/server 3.ubuntu.pool.ntp.org/ \
 
 sed -i "s/server ntp.ubuntu.com/server $CON_MGNT_IP iburst/g" /etc/ntp.conf
 
-
+sleep 5
+echo "##### Installl package for NOVA"
 apt-get -y install nova-compute sysfsutils
 apt-get -y install libguestfs-tools
 
@@ -42,7 +43,6 @@ sleep 5
 #/* Sao luu truoc khi sua file nova.conf
 filenova=/etc/nova/nova.conf
 test -f $filenova.orig || cp $filenova $filenova.orig
-
 
 #Chen noi dung file /etc/nova/nova.conf vao 
 cat << EOF > $filenova
@@ -86,8 +86,6 @@ project_name = service
 username = nova
 password = $KEYSTONE_PASS
 
-
-
 [vnc]
 enabled = True
 vncserver_listen = 0.0.0.0
@@ -113,17 +111,19 @@ password = $NEUTRON_PASS
 
 EOF
 
+echo "##### Restart nova-compute #####"
+sleep 5
 service nova-compute restart
 
 # Remove default nova db
 rm /var/lib/nova/nova.sqlite
 
-
-echo "Install Neutron on COMPUTE NODE"
+echo "##### Install linuxbridge-agent (neutron) on COMPUTE NODE #####"
 sleep 10
 
 apt-get -y install neutron-plugin-linuxbridge-agent
 
+echo "Config file neutron.conf"
 controlneutron=/etc/neutron/neutron.conf
 test -f $controlneutron.orig || cp $controlneutron $controlneutron.orig
 rm $controlneutron
@@ -135,8 +135,6 @@ core_plugin = ml2
 rpc_backend = rabbit
 auth_strategy = keystone
 verbose = True
-
-
 
 [matchmaker_redis]
 [matchmaker_ring]
@@ -153,7 +151,6 @@ user_domain_id = default
 project_name = service
 username = neutron
 password = $KEYSTONE_PASS
-
 
 [database]
 # connection = sqlite:////var/lib/neutron/neutron.sqlite
@@ -198,6 +195,8 @@ firewall_driver = neutron.agent.linux.iptables_firewall.IptablesFirewallDriver
 
 EOF
 
+echo "Reset service nova-compute,linuxbridge-agent"
+sleep 5
 service nova-compute restart
 service neutron-plugin-linuxbridge-agent restart
 

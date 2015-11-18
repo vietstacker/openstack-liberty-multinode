@@ -2,11 +2,14 @@
 
 source config.cfg
 
-echo "Update for Ubuntu"
+sleep 3
+echo "#### Update for Ubuntu #####"
 
 apt-get install software-properties-common -y
 add-apt-repository cloud-archive:liberty -y
 
+sleep 3
+echo "##### update for Ubuntu #####"
 apt-get update -y && apt-get upgrade -y && apt-get dist-upgrade -y
 
 echo "##### Configuring hostname for COMPUTE1 node... #####"
@@ -25,6 +28,8 @@ $CON_MGNT_IP    controller
 $COM1_MGNT_IP   compute1
 EOF
 
+sleep 3
+echo "##### Config network for COMPUTE NODE ####"
 ifaces=/etc/network/interfaces
 test -f $ifaces.orig || cp $ifaces $ifaces.orig
 rm $ifaces
