@@ -100,7 +100,7 @@ verbose = True
 
 
 [database]
-connection = mysql+pymysql://glance:$GLANCE_DBPASS@10.10.10.120/glance
+connection = mysql+pymysql://glance:$GLANCE_DBPASS@$CON_MGNT_IP/glance
 backend = sqlalchemy
 
 [glance_store]
