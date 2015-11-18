@@ -57,7 +57,7 @@ apt-get install software-properties-common -y
 add-apt-repository cloud-archive:liberty -y
 
 sleep 5
-echo "UPDATE PACKAGE FOR KILO"
+echo "UPDATE PACKAGE FOR LIBERTY"
 apt-get -y update && apt-get -y upgrade && apt-get -y dist-upgrade
 
 sleep 5
