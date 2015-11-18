@@ -609,6 +609,7 @@ nova service-list
 ### NEUTRON Install and configure controller node
 ####  Prerequisites
 - To create the database, complete these steps:
+
 mysql -u root -pWelcome123
 
 CREATE DATABASE neutron;
