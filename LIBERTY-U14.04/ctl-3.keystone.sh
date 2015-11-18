@@ -3,8 +3,8 @@
 source config.cfg
 
 echo "Create Database for Keystone"
-cat << EOF | mysql -uroot -p$MYSQL_PASS
 
+cat << EOF | mysql -uroot -p$MYSQL_PASS
 CREATE DATABASE keystone;
 GRANT ALL PRIVILEGES ON keystone.* TO 'keystone'@'localhost' IDENTIFIED BY 'Welcome123';
 GRANT ALL PRIVILEGES ON keystone.* TO 'keystone'@'%' IDENTIFIED BY 'Welcome123';
@@ -91,7 +91,7 @@ EOF
 #
 su -s /bin/sh -c "keystone-manage db_sync" keystone
  
-echo "ServerName $CON_MGNT_IP" >  /etc/apache2/apache2.conf
+echo "ServerName $CON_MGNT_IP" >>  /etc/apache2/apache2.conf
 
  
 cat << EOF > /etc/apache2/sites-available/wsgi-keystone.conf
