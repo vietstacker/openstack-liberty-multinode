@@ -260,7 +260,7 @@ mysql -u root -pWelcome123
 CREATE DATABASE glance;
 GRANT ALL PRIVILEGES ON glance.* TO 'glance'@'localhost' IDENTIFIED BY 'Welcome123';
 GRANT ALL PRIVILEGES ON glance.* TO 'glance'@'%' IDENTIFIED BY 'Welcome123';
-quit;
+quit;-
 
 
 - To create the service credentials, complete these steps
