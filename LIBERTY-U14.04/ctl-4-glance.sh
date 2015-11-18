@@ -3,9 +3,6 @@
 source config.cfg
 
 echo "Create the database for GLANCE"
-
-
-
 cat << EOF | mysql -uroot -p$MYSQL_PASS
 CREATE DATABASE glance;
 GRANT ALL PRIVILEGES ON glance.* TO 'glance'@'localhost' IDENTIFIED BY '$GLANCE_DBPASS';
@@ -158,8 +155,11 @@ echo "########## Registering Cirros IMAGE for GLANCE ... ##########"
 mkdir images
 cd images/
 wget http://download.cirros-cloud.net/0.3.4/cirros-0.3.4-x86_64-disk.img
-glance image-create --name "cirros-0.3.4-x86_64" --disk-format qcow2 \
---container-format bare --is-public True --progress < cirros-0.3.4-x86_64-disk.img
+
+glance image-create --name "cirros" \
+--file cirros-0.3.4-x86_64-disk.img \
+--disk-format qcow2 --container-format bare \
+--visibility public --progress
 cd /root/
 # rm -r /tmp/images
 
