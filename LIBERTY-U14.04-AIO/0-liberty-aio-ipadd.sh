@@ -14,9 +14,6 @@ cat << EOF > $ifaces
 auto lo
 iface lo inet loopback
 
-
-
-
 # LOCAL NETWORK
 auto eth0
 iface eth0 inet static
