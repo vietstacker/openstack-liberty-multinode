@@ -1,40 +1,41 @@
-#!/bin/bash -ex
+#!/bin/bash -ex 
+
 source config.cfg
 
+echo "########## CONFIGURING STATIC IP FOR NICs ##########"
 
 ifaces=/etc/network/interfaces
 test -f $ifaces.orig || cp $ifaces $ifaces.orig
 rm $ifaces
-touch $ifaces
-cat << EOF >> $ifaces
-#Assign IP for Controller node
+cat << EOF > $ifaces
+#Configuring IP for Controller node
 
 # LOOPBACK NET 
 auto lo
 iface lo inet loopback
 
-# MGNT NETWORK
+
+
+
+# LOCAL NETWORK
 auto eth0
 iface eth0 inet static
-address $CON_MGNT_IP
-netmask $NETMASK_ADD_MGNT
-
+address $LOCAL_IP
+netmask $NETMASK_LOCAL
 
 # EXT NETWORK
 auto eth1
 iface eth1 inet static
-address $CON_EXT_IP
-netmask $NETMASK_ADD_EXT
-gateway $GATEWAY_IP_EXT
+address $MASTER
+netmask $NETMASK_MASTER
+gateway $GATEWAY_IP
 dns-nameservers 8.8.8.8
 EOF
-
 
 echo "Configuring hostname in CONTROLLER node"
 sleep 3
 echo "controller" > /etc/hostname
 hostname -F /etc/hostname
-
 
 echo "Configuring for file /etc/hosts"
 sleep 3
@@ -43,14 +44,10 @@ test -f $iphost.orig || cp $iphost $iphost.orig
 rm $iphost
 touch $iphost
 cat << EOF >> $iphost
-127.0.0.1       localhost
-127.0.1.1       controller
-$CON_MGNT_IP    controller
-$COM1_MGNT_IP   compute1
-
+127.0.0.1       localhost controller
+$LOCAL_IP   controller
 
 EOF
-
 
 echo "##### Cai dat repos cho Liberty ##### "
 apt-get install software-properties-common -y
