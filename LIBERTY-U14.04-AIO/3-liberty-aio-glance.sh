@@ -155,6 +155,7 @@ glance image-create --name "cirros" \
 --file cirros-0.3.4-x86_64-disk.img \
 --disk-format qcow2 --container-format bare \
 --visibility public --progress
+
 cd /root/
 # rm -r /tmp/images
 

@@ -46,6 +46,13 @@ $LOCAL_IP   controller
 
 EOF
 
+
+# Enable IP forwarding
+echo "net.ipv4.ip_forward = 1" >> /etc/sysctl.conf
+echo "net.ipv4.conf.all.rp_filter=0" >> /etc/sysctl.conf
+echo "net.ipv4.conf.default.rp_filter=0" >> /etc/sysctl.conf
+sysctl -p
+
 echo "##### Cai dat repos cho Liberty ##### "
 apt-get install software-properties-common -y
 add-apt-repository cloud-archive:liberty -y
