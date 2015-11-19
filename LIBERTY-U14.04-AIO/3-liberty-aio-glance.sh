@@ -62,7 +62,6 @@ project_name = service
 username = glance
 password = $GLANCE_PASS
 
-
 [matchmaker_redis]
 [matchmaker_ring]
 [oslo_concurrency]
@@ -95,7 +94,6 @@ cat << EOF > $fileglanceregcontrol
 notification_driver = noop
 verbose = True
 
-
 [database]
 connection = mysql+pymysql://glance:$GLANCE_DBPASS@$LOCAL_IP/glance
 backend = sqlalchemy
@@ -111,7 +109,6 @@ user_domain_id = default
 project_name = service
 username = glance
 password = $GLANCE_PASS
-
 
 [matchmaker_redis]
 [matchmaker_ring]
@@ -145,10 +142,8 @@ service glance-registry restart
 service glance-api restart
 
 #
-
 echo "Remove glance.sqlite "
 rm -f /var/lib/glance/glance.sqlite
-
 
 sleep 3
 echo "########## Registering Cirros IMAGE for GLANCE ... ##########"
