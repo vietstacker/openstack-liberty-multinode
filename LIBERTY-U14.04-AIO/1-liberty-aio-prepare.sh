@@ -28,7 +28,7 @@ restrict -4 default kod notrap nomodify \
 restrict -6 default kod notrap nomodify/g' /etc/ntp.conf
 
 # sed -i 's/server/#server/' /etc/ntp.conf
-# echo "server $CON_MGNT_IP" >> /etc/ntp.conf
+# echo "server $LOCAL_IP" >> /etc/ntp.conf
 
 ##############################################
 echo "Install and Config RabbitMQ"
