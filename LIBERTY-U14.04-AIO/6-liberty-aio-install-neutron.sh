@@ -29,11 +29,9 @@ apt-get install -y openvswitch-switch
 apt-get -y install neutron-server python-neutronclient neutron-plugin-ml2 neutron-plugin-openvswitch-agent \
 neutron-l3-agent neutron-dhcp-agent neutron-metadata-agent neutron-plugin-openvswitch neutron-common
 
-
 ######## SAO LUU CAU HINH NEUTRON.CONF CHO CONTROLLER##################"
 echo "########## Sua lai file neutron.conf ##########"
 
-#
 controlneutron=/etc/neutron/neutron.conf
 test -f $controlneutron.orig || cp $controlneutron $controlneutron.orig
 rm $controlneutron
