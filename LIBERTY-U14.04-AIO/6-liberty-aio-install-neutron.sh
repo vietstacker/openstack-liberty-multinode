@@ -1,6 +1,28 @@
 #!/bin/bash -ex
 source config.cfg
 
+
+echo "Create DB for NEUTRON "
+cat << EOF | mysql -uroot -p$MYSQL_PASS
+CREATE DATABASE neutron;
+GRANT ALL PRIVILEGES ON neutron.* TO 'neutron'@'localhost' IDENTIFIED BY '$NEUTRON_DBPASS';
+GRANT ALL PRIVILEGES ON neutron.* TO 'neutron'@'%' IDENTIFIED BY '$NEUTRON_DBPASS';
+FLUSH PRIVILEGES;
+EOF
+
+
+echo "Create  user, endpoint for NEUTRON"
+openstack user create --password $ADMIN_PASS neutron
+openstack role add --project service --user neutron admin
+openstack service create --name neutron --description "OpenStack Networking" network
+ 
+openstack endpoint create \
+  --publicurl http://$LOCAL_IP:9696 \
+  --adminurl http://$LOCAL_IP:9696 \
+  --internalurl http://$LOCAL_IP:9696 \
+  --region RegionOne \
+  network 
+
 echo "########## CAI DAT NEUTRON TREN CONTROLLER ##########"
 apt-get install -y openvswitch-switch 
 
@@ -223,5 +245,5 @@ echo "exit 0" >> /etc/rc.local
 
 echo "########## KIEM TRA NEUTRON (cho 60s)   ##########"
 # Can doi neutron khoi dong xong de kiem tra
-sleep 60
+sleep 30
 neutron agent-list
