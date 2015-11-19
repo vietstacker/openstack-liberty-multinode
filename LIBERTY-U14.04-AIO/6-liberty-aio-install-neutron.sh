@@ -208,6 +208,8 @@ chown root:neutron $controlML2
 
 su -s /bin/sh -c "neutron-db-manage --config-file /etc/neutron/neutron.conf \
   --config-file /etc/neutron/plugins/ml2/ml2_conf.ini upgrade head" neutron
+  
+  
 
 echo "########## KHOI DONG LAI NEUTRON        ##########"
 sleep 5
