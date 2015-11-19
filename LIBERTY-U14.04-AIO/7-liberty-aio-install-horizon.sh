@@ -25,7 +25,7 @@ touch $filehtml
 cat << EOF >> $filehtml
 <html>
 <head>
-<META HTTP-EQUIV="Refresh" Content="0.5; URL=http://$CON_EXT_IP/horizon">
+<META HTTP-EQUIV="Refresh" Content="0.5; URL=http://$MASTER/horizon">
 </head>
 <body>
 <center> <h1>Dang chuyen den Dashboard cua OpenStack</h1> </center>
@@ -41,6 +41,6 @@ service memcached restart
 echo "########## Finish setting up Horizon ##########"
 
 echo "########## LOGIN INFORMATION IN HORIZON ##########"
-echo "URL: http://$CON_EXT_IP/horizon"
+echo "URL: http://$MASTER/horizon"
 echo "User: admin or demo"
 echo "Password:" $ADMIN_PASS
