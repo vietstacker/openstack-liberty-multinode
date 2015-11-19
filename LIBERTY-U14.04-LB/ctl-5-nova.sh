@@ -18,14 +18,14 @@ openstack role add --project service --user nova admin
 openstack service create --name nova --description "OpenStack Compute" compute
 
 openstack endpoint create \
---publicurl http://$LOCAL_IP:8774/v2/%\(tenant_id\)s \
---internalurl http://$LOCAL_IP:8774/v2/%\(tenant_id\)s \
---adminurl http://$LOCAL_IP:8774/v2/%\(tenant_id\)s \
+--publicurl http://$CON_MGNT_IP:8774/v2/%\(tenant_id\)s \
+--internalurl http://$CON_MGNT_IP:8774/v2/%\(tenant_id\)s \
+--adminurl http://$CON_MGNT_IP:8774/v2/%\(tenant_id\)s \
 --region RegionOne \
 compute
 
 
-echo "########## Install NOVA in $LOCAL_IP ##########"
+echo "########## Install NOVA in $CON_MGNT_IP ##########"
 sleep 5 
 apt-get -y install nova-api nova-cert nova-conductor nova-consoleauth nova-novncproxy nova-scheduler python-novaclient
 apt-get -y install libguestfs-tools 
@@ -55,7 +55,7 @@ ec2_private_dns_show_ip=True
 api_paste_config=/etc/nova/api-paste.ini
 enabled_apis=ec2,osapi_compute,metadata
 
-my_ip = $LOCAL_IP
+my_ip = $CON_MGNT_IP
 
 network_api_class = nova.network.neutronv2.api.API
 security_group_api = neutron
@@ -67,16 +67,16 @@ verbose = True
 
 
 [database]
-connection = mysql+pymysql://nova:$NOVA_DBPASS@$LOCAL_IP/nova
+connection = mysql+pymysql://nova:$NOVA_DBPASS@$CON_MGNT_IP/nova
 
 [oslo_messaging_rabbit]
-rabbit_host = $LOCAL_IP
+rabbit_host = $CON_MGNT_IP
 rabbit_userid = openstack
 rabbit_password = Welcome123
 
 [keystone_authtoken]
-auth_uri = http://$LOCAL_IP:5000
-auth_url = http://$LOCAL_IP:35357
+auth_uri = http://$CON_MGNT_IP:5000
+auth_url = http://$CON_MGNT_IP:35357
 auth_plugin = password
 project_domain_id = default
 user_domain_id = default
@@ -89,14 +89,14 @@ vncserver_listen = $my_ip
 vncserver_proxyclient_address = $my_ip
 
 [glance]
-host = $LOCAL_IP
+host = $CON_MGNT_IP
 
 [oslo_concurrency]
 lock_path = /var/lib/nova/tmp
 
 [neutron]
-url = http://$LOCAL_IP:9696
-auth_url = http://$LOCAL_IP:35357
+url = http://$CON_MGNT_IP:9696
+auth_url = http://$CON_MGNT_IP:35357
 auth_plugin = password
 project_domain_id = default
 user_domain_id = default
