@@ -10,6 +10,7 @@
   
 ##### Môi trường cài đặt
 - LAB trên Vmware Workstation hoặc máy vật lý, đáp ứng yêu cầu tối thiểu sau:
+```sh
  - RAM: 4GB
  - HDD
   - HDD1: 60GB (cài OS và các thành phần của OpenStack)
@@ -18,5 +19,6 @@
   - NIC 1:  - eth0 - Management Network
   - NIC 2: - eth1 - External Network
  - CPU hỗ trợ ảo hóa
+```
 
 
