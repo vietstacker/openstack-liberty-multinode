@@ -28,6 +28,9 @@ compute
 echo "########## Install NOVA in $CON_MGNT_IP ##########"
 sleep 5 
 apt-get -y install nova-api nova-cert nova-conductor nova-consoleauth nova-novncproxy nova-scheduler python-novaclient
+
+# Cai tu dong libguestfs-tools 
+echo "libguestfs-tools        libguestfs/update-appliance     boolean true"  | debconf-set-selections
 apt-get -y install libguestfs-tools 
 
 ######## Backup configurations for NOVA ##########"
