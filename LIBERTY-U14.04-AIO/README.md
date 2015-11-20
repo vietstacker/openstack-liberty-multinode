@@ -22,10 +22,12 @@
 ```
 
 ### Các bước thực hiện
+
 #### Chuẩn bị môi trường trên VMware
 
+#### Lựa chọn 1:  Thực hiện cài đặt bằng 01 duy nhất.
+- Nếu chọn lựa chọn 1 thì sau khi cài xong chuyển qua bước sử dụng dashboard luôn, bỏ qua lựa chọn 2
 
-#### Thực hiện cài đặt script
 #### Tải GIT và cấu hình ip động cho các card mạng.
 - Cấu hình network bằng đoạn lệnh sau để đảm bảo máy chủ có 02 NIC
 ```sh
@@ -78,6 +80,25 @@ apt-get update
 apt-get -y install git
 ```
 
+- Thực thi script để đặt địa chỉ IP tĩnh cho máy cài OpenStack
+```sh
+git clone https://github.com/vietstacker/openstack-liberty-multinode.git
+
+mv /root/openstack-liberty-multinode/LIBERTY-U14.04-AIO /root
+rm -rf openstack-liberty-multinode
+
+cd LIBERTY-U14.04-AIO 
+chmod +x *.sh
+bash AIO-LIBERTY-1.sh 
+```
+- Máy sẽ khởi động lại, đăng nhập và thực hiện script tiếp theo
+- Thực thi script cài đặt toàn bộ các thành phần còn lại
+```sh
+bash AIO-LIBERTY-2.sh
+```
+
+
+#### Lựa chọn 2:  Thực hiện cài đặt theo từng script
 #### Tải script và thực thi script
 - Tải script
 - Sử dụng quyền root để đăng nhập, với Ubuntu 14.04 cần đăng nhập bằng user thường trước, sau đó chuyển qua root bằng lệnh su -
