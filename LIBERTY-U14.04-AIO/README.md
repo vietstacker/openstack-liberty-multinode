@@ -71,8 +71,10 @@ PING google.com (203.162.236.211) 56(84) bytes of data.
 64 bytes from 203.162.236.211: icmp_seq=3 ttl=57 time=0.781 ms
 
 ```
-- Cài đặt git
+- Cài đặt git với quền root
 ```sh
+su -
+apt-get update
 apt-get instal -y git
 ```
 
