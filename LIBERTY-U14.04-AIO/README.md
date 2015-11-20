@@ -130,7 +130,8 @@ bash 4-liberty-aio-nova.sh
 ```sh
 bash 5-liberty-aio-config-ip-neutron.sh
 ```
-- Sau khi thực thi xong script trên, máy chủ sẽ khởi động lại. Đăng nhập với quyền root và tiếp tục thực hiện lệnh dưới để cài CINDER
+- Sau khi thực thi xong script trên, máy chủ sẽ khởi động lại. Đăng nhập với quyền root và tiếp tục thực hiện lệnh dưới để cài NEUTRON
+
 ```sh
 bash 6-liberty-aio-install-neutron.sh
 ```
