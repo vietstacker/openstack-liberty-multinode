@@ -89,7 +89,7 @@ password = $KEYSTONE_PASS
 [vnc]
 enabled = True
 vncserver_listen = 0.0.0.0
-vncserver_proxyclient_address = $my_ip
+vncserver_proxyclient_address = \$my_ip
 novncproxy_base_url = http://$CON_EXT_IP:6080/vnc_auto.html
 
 [glance]

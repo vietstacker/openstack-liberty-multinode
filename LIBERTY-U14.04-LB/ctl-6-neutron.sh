@@ -269,7 +269,7 @@ echo "Setup IP for PUBLIC interface"
 sleep 5
 
 
-cat << EOF >> /etc/network/interfaces
+cat << EOF > /etc/network/interfaces
 #Assign IP for Controller node
 
 # LOOPBACK NET 
@@ -301,3 +301,5 @@ EOF
 
 ifdown -a && ifup -a
 
+echo "#### Reboot ####":
+reboot
