@@ -144,7 +144,6 @@ bash 3-liberty-aio-glance.sh
 ```
 bash 4-liberty-aio-nova.sh
 ```
-- Chọn "Yes" khi cài libguestool
 
 ##### Cài đặt NEUTRON
 - Cài đặt OpenvSwitch và cấu hình lại NIC

@@ -28,6 +28,7 @@ compute
 echo "########## Install NOVA in $LOCAL_IP ##########"
 sleep 5 
 apt-get -y install  nova-compute nova-api nova-cert nova-conductor nova-consoleauth nova-novncproxy nova-scheduler python-novaclient
+echo "libguestfs-tools        libguestfs/update-appliance     boolean true"  | debconf-set-selections
 apt-get -y install libguestfs-tools sysfsutils
 
 
