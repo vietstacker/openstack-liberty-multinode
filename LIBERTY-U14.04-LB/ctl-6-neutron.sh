@@ -301,3 +301,6 @@ EOF
 
 ifdown -a && ifup -a
 
+echo "#### Reboot ####"
+sleep(3)
+reboot
