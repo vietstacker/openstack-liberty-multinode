@@ -14,7 +14,7 @@
  - RAM: 4GB
  - HDD
   - HDD1: 60GB (cài OS và các thành phần của OpenStack)
-  - HDD2: 40GB (sử dụng để cài CINDER - cung cấp VOLUME cho OpenStack)
+  - HDD2: 40GB (sử dụng để cài CINDER - cung cấp VOLUME cho OpenStack) - CHÚ Ý: NẾU KHÔNG CÀI CINDER THÌ KHÔNG CẦN Ổ NÀY
  - 02 NIC với thứ tự sau
   - NIC 1:  - eth0 - Management Network
   - NIC 2: - eth1 - External Network
@@ -26,7 +26,7 @@
 
 
 #### Thực hiện cài đặt script
-#### Tải GIT và kiểm tra các NIC
+#### Tải GIT và cấu hình ip động cho các card mạng.
 - Cấu hình network bằng đoạn lệnh sau để đảm bảo máy chủ có 02 NIC
 ```sh
 
@@ -76,9 +76,13 @@ PING google.com (203.162.236.211) 56(84) bytes of data.
 apt-get instal -y git
 ```
 
-##### Tải script và thực thi script
+#### Tải script và thực thi script
 - Tải script
+- Sử dụng quyền root để đăng nhập, với Ubuntu 14.04 cần đăng nhập bằng user thường trước, sau đó chuyển qua root bằng lệnh su -
+
 ```sh
+su -
+
 git clone https://github.com/vietstacker/openstack-liberty-multinode.git
 
 mv /root/openstack-liberty-multinode/LIBERTY-U14.04-AIO
@@ -88,4 +92,55 @@ cd LIBERTY-U14.04-AIO
 chmod +x *.sh
 ```
 
+##### Thực thi script đặt IP cho các card mạng
+- Script sẽ thực hiện tự động việc đặt IP tĩnh cho các card mạng
+```sh
+bash 0-liberty-aio-ipadd.sh
+```
 
+##### Cài đặt các gói NTP, MARIADB, RABBITMQ
+- Đăng nhập lại máy chủ với quyền root và thực thi script
+```sh
+bash 1-liberty-aio-prepare.sh
+```
+
+##### Cài đặt Keystone
+- Thực thi script dưới để cài đặt Keystone
+```sh
+bash 2-liberty-aio-keystone.sh
+```
+
+- Thực thi lệnh dưới để khai báo biến môi trường cho OpenStack
+```sh
+source admin-openrc.sh
+```
+
+##### Cài đặt GLANCE
+```sh
+bash 3-liberty-aio-glance.sh
+```
+
+##### Cài đặt NOVA
+```
+bash 4-liberty-aio-nova.sh
+```
+
+##### Cài đặt NEUTRON
+- Cài đặt OpenvSwitch và cấu hình lại NIC
+```sh
+bash 5-liberty-aio-config-ip-neutron.sh
+```
+- Sau khi thực thi xong script trên, máy chủ sẽ khởi động lại. Đăng nhập với quyền root và tiếp tục thực hiện lệnh dưới để cài CINDER
+```sh
+bash 6-liberty-aio-install-neutron.sh
+```
+
+##### Cài đặt Horizon
+```
+bash 7-liberty-aio-install-horizon.sh
+```
+
+#### Hướng dẫn tạo network, vm trên dashboard
+```sh
+đang update
+```
