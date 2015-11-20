@@ -102,6 +102,8 @@ bash AIO-LIBERTY-1.sh
 ```sh
 bash AIO-LIBERTY-2.sh
 ```
+- Chờ khoảng 30-60 phút để thực hiện tải và cấu hình các dịch vụ sau đó chuyển qua bước tạo network, tạo VM. 
+- Kết thúc việc cài đặt OpenStack
 
 
 #### Lựa chọn 2:  Thực hiện cài đặt theo từng script
