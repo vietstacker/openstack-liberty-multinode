@@ -24,6 +24,12 @@
 ### Các bước thực hiện
 
 #### Chuẩn bị môi trường trên VMware
+Thiết lập cấu hình như bên dưới, lưu ý:
+- NIC1: Sử dụng Vmnet 1 hoặc hostonly
+- NIC2: Sử dụng bridge
+- CPU: 2x2, nhớ chọn VT
+
+![Topo-liberty](/images/VMware1.png)
 
 #### Lựa chọn 1:  Thực hiện cài đặt bằng 01 duy nhất.
 - Nếu chọn lựa chọn 1 thì sau khi cài xong chuyển qua bước sử dụng dashboard luôn, bỏ qua lựa chọn 2
