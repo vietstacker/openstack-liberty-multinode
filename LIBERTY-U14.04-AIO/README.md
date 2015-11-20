@@ -1,6 +1,6 @@
 # Cài đặt & HDSD OpenStack LIBERTY AIO
 
-#### Giới thiệu
+### Giới thiệu
 - Script cài đặt OpenStack Liberty trên một máy chủ
 - Các thành phần cài đặt bao gồm
   - MariaDB, NTP
@@ -8,7 +8,7 @@
   - Glance
   - Neutron (ML2, OpenvSwitch)
   
-##### Môi trường cài đặt
+### Môi trường cài đặt
 - LAB trên Vmware Workstation hoặc máy vật lý, đáp ứng yêu cầu tối thiểu sau:
 ```sh
  - RAM: 4GB
@@ -20,5 +20,41 @@
   - NIC 2: - eth1 - External Network
  - CPU hỗ trợ ảo hóa
 ```
+
+### Các bước thực hiện
+#### Chuẩn bị môi trường trên VMware
+
+
+#### Thực hiện cài đặt script
+#### Tải GIT và kiểm tra các NIC
+- Cài đặt git
+```sh
+apt-get instal -y git
+```
+
+- Cấu hình network bằng đoạn lệnh sau để đảm bảo máy chủ có 02 NIC
+```sh
+
+cat << EOF > /etc/network/interfaces
+auto lo
+iface lo inet loopback
+
+# NIC MGNT
+auto eth0
+iface eth0 inet dhcp
+
+# NIC EXT
+auto eth1
+iface eth1 inet dhcp
+EOF
+
+```
+
+- Khởi động lại network
+```sh
+ifdown -a && ifup -a
+```
+
+
 
 
