@@ -27,11 +27,6 @@
 
 #### Thực hiện cài đặt script
 #### Tải GIT và kiểm tra các NIC
-- Cài đặt git
-```sh
-apt-get instal -y git
-```
-
 - Cấu hình network bằng đoạn lệnh sau để đảm bảo máy chủ có 02 NIC
 ```sh
 
@@ -66,5 +61,31 @@ root@controller:~# landscape-sysinfo
   Swap usage:   0%                
 ```
 
+- Kiểm tra kết nối internet bằng lệnh `ping google.com`
+```sh
+root@controller:~# ping google.com
+
+PING google.com (203.162.236.211) 56(84) bytes of data.
+64 bytes from 203.162.236.211: icmp_seq=1 ttl=57 time=0.877 ms
+64 bytes from 203.162.236.211: icmp_seq=2 ttl=57 time=0.786 ms
+64 bytes from 203.162.236.211: icmp_seq=3 ttl=57 time=0.781 ms
+
+```
+- Cài đặt git
+```sh
+apt-get instal -y git
+```
+
+##### Tải script và thực thi script
+- Tải script
+```sh
+git clone https://github.com/vietstacker/openstack-liberty-multinode.git
+
+mv /root/openstack-liberty-multinode/LIBERTY-U14.04-AIO
+rm -rf openstack-liberty-multinode
+
+cd LIBERTY-U14.04-AIO 
+chmod +x *.sh
+```
 
 
