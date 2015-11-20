@@ -55,6 +55,16 @@ EOF
 ifdown -a && ifup -a
 ```
 
+- Kiểm tra lại địa chỉ IP của máy cài OpenStack, đảm bảo có đủ 02 NIC bằng lệnh `landscape-sysinfo`
+
+```sh
+root@controller:~# landscape-sysinfo
+
+  System load:  0.93              Users logged in:       1
+  Usage of /:   4.0% of 94.11GB   IP address for eth0:   10.10.10.159
+  Memory usage: 53%               IP address for eth0  172.16.69.228
+  Swap usage:   0%                
+```
 
 
 
