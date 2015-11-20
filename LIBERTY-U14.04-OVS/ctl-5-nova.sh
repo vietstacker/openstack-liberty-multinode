@@ -66,8 +66,6 @@ linuxnet_interface_driver = nova.network.linux_net.LinuxOVSInterfaceDriver
 firewall_driver = nova.virt.firewall.NoopFirewallDriver
 
 
-
-
 enabled_apis=osapi_compute,metadata
 verbose = True
 
