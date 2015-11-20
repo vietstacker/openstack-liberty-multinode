@@ -88,8 +88,8 @@ username = nova
 password = $NOVA_PASS
 
 [vnc]
-vncserver_listen = $my_ip
-vncserver_proxyclient_address = $my_ip
+vncserver_listen = \$my_ip
+vncserver_proxyclient_address = \$my_ip
 
 [glance]
 host = $CON_MGNT_IP
