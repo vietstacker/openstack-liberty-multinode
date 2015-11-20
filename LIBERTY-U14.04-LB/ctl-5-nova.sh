@@ -31,7 +31,7 @@ apt-get -y install nova-api nova-cert nova-conductor nova-consoleauth nova-novnc
 
 # Cai tu dong libguestfs-tools 
 echo "libguestfs-tools        libguestfs/update-appliance     boolean true"  | debconf-set-selections
-apt-get -y install libguestfs-tools 
+apt-get -y install libguestfs-tools sysfsutils
 
 ######## Backup configurations for NOVA ##########"
 sleep 7
