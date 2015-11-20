@@ -101,8 +101,11 @@ bash 0-liberty-aio-ipadd.sh
 ##### Cài đặt các gói NTP, MARIADB, RABBITMQ
 - Đăng nhập lại máy chủ với quyền root và thực thi script
 ```sh
+su -
+cd LIBERTY-U14.04-AIO 
 bash 1-liberty-aio-prepare.sh
 ```
+- Sau khi thực hiện script trên xong, máy chủ sẽ khởi động lại.
 
 ##### Cài đặt Keystone
 - Thực thi script dưới để cài đặt Keystone
