@@ -50,7 +50,6 @@ notify_nova_on_port_status_changes = True
 notify_nova_on_port_data_changes = True
 nova_url = http://$LOCAL_IP:8774/v2
 
-
 [matchmaker_redis]
 [matchmaker_ring]
 [quotas]
@@ -67,18 +66,15 @@ project_name = service
 username = neutron
 password = $NEUTRON_PASS
 
-
-
 [database]
 connection = mysql+pymysql://neutron:$NEUTRON_DBPASS@$LOCAL_IP/neutron
-
 
 [nova]
 auth_url = http://$LOCAL_IP:35357
 auth_plugin = password
 project_domain_id = default
 user_domain_id = default
-region_name = regionOne
+region_name = RegionOne
 project_name = service
 username = nova
 password = $NOVA_PASS
@@ -154,7 +150,7 @@ verbose = True
 
 auth_uri = http://$LOCAL_IP:5000
 auth_url = http://$LOCAL_IP:35357
-auth_region = regionOne
+auth_region = RegionOne
 auth_plugin = password
 project_domain_id = default
 user_domain_id = default
@@ -177,12 +173,14 @@ test -f $dhcpfile.orig || cp $dhcpfile $dhcpfile.orig
 rm $dhcpfile
 cat << EOF > $dhcpfile
 [DEFAULT]
+use_namespaces = True
+interface_driver = neutron.agent.linux.interface.OVSInterfaceDriver
+dhcp_driver = neutron.agent.linux.dhcp.Dnsmasq
+enable_isolated_metadata = True
 verbose = True
 dnsmasq_config_file = /etc/neutron/dnsmasq-neutron.conf
 
-interface_driver = neutron.agent.linux.interface.OVSInterfaceDriver
-dhcp_driver = neutron.agent.linux.dhcp.Dnsmasq
-dhcp_delete_namespaces = True
+[AGENT]
 
 EOF
 

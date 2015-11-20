@@ -86,8 +86,12 @@ username = nova
 password = $NOVA_PASS
 
 [vnc]
-vncserver_listen = $my_ip
-vncserver_proxyclient_address = $my_ip
+vncserver_listen = \$my_ip
+vncserver_proxyclient_address = \$my_ip
+novncproxy_base_url = http://$MASTER:6080/vnc_auto.html
+
+
+
 
 [glance]
 host = $LOCAL_IP
