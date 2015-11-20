@@ -75,7 +75,7 @@ PING google.com (203.162.236.211) 56(84) bytes of data.
 ```sh
 su -
 apt-get update
-apt-get instal -y git
+apt-get -y install git
 ```
 
 #### Tải script và thực thi script
