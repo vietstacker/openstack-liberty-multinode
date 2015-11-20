@@ -17,6 +17,7 @@ chmod +x *.sh
 
 ```
 
+## Cài đặt trên CONTROLLER NODE
 ### Cài đặt script thiết lập IP và repos cho Liberty
 ```sh
 bash ctl-1-ipadd.sh
@@ -42,3 +43,14 @@ source admin-openrc.sh
 ```sh
 bash ctl-4-glance.sh
 ```
+
+### Cài đặt NOVA
+```sh
+bash ctl-5-nova.sh
+```
+
+### Cài đặt NEUTRON
+```sh
+bash ctl-6-neutron.sh
+```
+

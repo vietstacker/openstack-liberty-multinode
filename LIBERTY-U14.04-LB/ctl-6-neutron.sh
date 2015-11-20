@@ -31,9 +31,8 @@ openstack endpoint create \
 
 echo "########## Install NEUTRON in $CON_MGNT_IP or NETWORK node ################"
 sleep 5
-apt-get -y install neutron-server neutron-plugin-ml2 \
-neutron-plugin-linuxbridge-agent neutron-l3-agent neutron-dhcp-agent \
-neutron-metadata-agent python-neutronclient
+apt-get -y install neutron-server python-neutronclient neutron-plugin-ml2 neutron-plugin-openvswitch-agent \
+neutron-l3-agent neutron-dhcp-agent neutron-metadata-agent neutron-plugin-openvswitch neutron-common
 
 
 ######## Backup configuration NEUTRON.CONF in $CON_MGNT_IP##################"
@@ -126,7 +125,7 @@ extension_drivers = port_security
 
 
 [ml2_type_flat]
-flat_networks = public
+flat_networks = external
 
 [ml2_type_vlan]
 
@@ -149,7 +148,7 @@ test -f $linuxbridgefile.orig || cp $linuxbridgefile $linuxbridgefile.orig
 
 cat << EOF >> $linuxbridgefile
 [linux_bridge]
-physical_interface_mappings = public:eth1
+physical_interface_mappings = external:eth1
 
 [vxlan]
 enable_vxlan = True
