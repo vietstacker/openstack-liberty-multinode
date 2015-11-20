@@ -54,3 +54,9 @@ bash ctl-5-nova.sh
 bash ctl-6-neutron.sh
 ```
 
+### Cài đặt HORIZON
+- Đăng nhập với quyền `root` và thực hiện script sau
+```sh
+bash ctl-horizon.sh
+```
+

@@ -31,9 +31,8 @@ openstack endpoint create \
 
 echo "########## Install NEUTRON in $CON_MGNT_IP or NETWORK node ################"
 sleep 5
-apt-get -y install neutron-server neutron-plugin-ml2 \
-neutron-plugin-linuxbridge-agent neutron-l3-agent neutron-dhcp-agent \
-neutron-metadata-agent python-neutronclient
+apt-get -y install neutron-server python-neutronclient neutron-plugin-ml2 neutron-plugin-openvswitch-agent \
+neutron-l3-agent neutron-dhcp-agent neutron-metadata-agent neutron-plugin-openvswitch neutron-common
 
 
 ######## Backup configuration NEUTRON.CONF in $CON_MGNT_IP##################"
