@@ -62,8 +62,11 @@ my_ip = $CON_MGNT_IP
 
 network_api_class = nova.network.neutronv2.api.API
 security_group_api = neutron
-linuxnet_interface_driver = nova.network.linux_net.NeutronLinuxBridgeInterfaceDriver
+linuxnet_interface_driver = nova.network.linux_net.LinuxOVSInterfaceDriver
 firewall_driver = nova.virt.firewall.NoopFirewallDriver
+
+
+
 
 enabled_apis=osapi_compute,metadata
 verbose = True

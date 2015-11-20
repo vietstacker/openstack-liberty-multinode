@@ -5,7 +5,15 @@
 
 source config.cfg
 
+echo "############ Configuring net forward for all VMs ############"
+sleep 5
+echo "net.ipv4.ip_forward=1" >> /etc/sysctl.conf
+echo "net.ipv4.conf.all.rp_filter=0" >> /etc/sysctl.conf
+echo "net.ipv4.conf.default.rp_filter=0" >> /etc/sysctl.conf
+sysctl -p 
+
 echo "Create DB for NEUTRON "
+sleep 5
 cat << EOF | mysql -uroot -p$MYSQL_PASS
 CREATE DATABASE neutron;
 GRANT ALL PRIVILEGES ON neutron.* TO 'neutron'@'localhost' IDENTIFIED BY '$NEUTRON_DBPASS';
@@ -15,6 +23,7 @@ EOF
 
 
 echo "Create  user, endpoint for NEUTRON"
+sleep 5
 openstack user create --password $ADMIN_PASS neutron
 openstack role add --project service --user neutron admin
 openstack service create --name neutron --description "OpenStack Networking" network
@@ -29,15 +38,16 @@ openstack endpoint create \
 # SERVICE_TENANT_ID=`keystone tenant-get service | awk '$2~/^id/{print $4}'`
 
 
-echo "########## Install NEUTRON in $CON_MGNT_IP or NETWORK node ################"
+echo "########## Install NEUTRON in 172.16.69.40 or NETWORK node ################"
 sleep 5
 apt-get -y install neutron-server python-neutronclient neutron-plugin-ml2 neutron-plugin-openvswitch-agent \
 neutron-l3-agent neutron-dhcp-agent neutron-metadata-agent neutron-plugin-openvswitch neutron-common
 
 
-######## Backup configuration NEUTRON.CONF in $CON_MGNT_IP##################"
-echo "########## Config NEUTRON in $CON_MGNT_IP/NETWORK node ##########"
-sleep 7
+
+######## Backup configuration NEUTRON.CONF ##################"
+echo "########## Config NEUTRON ##########"
+sleep 5
 
 #
 controlneutron=/etc/neutron/neutron.conf
@@ -47,16 +57,14 @@ touch $controlneutron
 cat << EOF >> $controlneutron
 [DEFAULT]
 core_plugin = ml2
-service_plugins = router
-allow_overlapping_ips = True
 rpc_backend = rabbit
 
-auth_strategy = keystone
+service_plugins = router
+allow_overlapping_ips = True
 
 notify_nova_on_port_status_changes = True
 notify_nova_on_port_data_changes = True
 nova_url = http://$CON_MGNT_IP:8774/v2
-
 verbose = True
 
 
@@ -65,7 +73,6 @@ verbose = True
 [quotas]
 [agent]
 root_helper = sudo /usr/bin/neutron-rootwrap /etc/neutron/rootwrap.conf
-
 [keystone_authtoken]
 auth_uri = http://$CON_MGNT_IP:5000
 auth_url = http://$CON_MGNT_IP:35357
@@ -74,23 +81,13 @@ project_domain_id = default
 user_domain_id = default
 project_name = service
 username = neutron
-password = $NEUTRON_PASS
+password = $KEYSTONE_PASS
 
 
 [database]
 connection = mysql+pymysql://neutron:$NEUTRON_DBPASS@$CON_MGNT_IP/neutron
 
-
 [nova]
-auth_url = http://$CON_MGNT_IP:35357
-auth_plugin = password
-project_domain_id = default
-user_domain_id = default
-region_name = RegionOne
-project_name = service
-username = nova
-password = $NOVA_PASS
-
 [oslo_concurrency]
 lock_path = \$state_path/lock
 [oslo_policy]
@@ -102,13 +99,23 @@ rabbit_host = $CON_MGNT_IP
 rabbit_userid = openstack
 rabbit_password = $RABBIT_PASS
 
+[nova]
+auth_url = http://$CON_MGNT_IP:35357
+auth_plugin = password
+project_domain_id = default
+user_domain_id = default
+region_name = RegionOne
+project_name = service
+username = nova
+password = $NOVA_PASS
+
 [qos]
 
 EOF
 
 
-######## Backup configuration of ML2 in $CON_MGNT_IP##################"
-echo "########## Configuring ML2 in $CON_MGNT_IP/NETWORK node ##########"
+######## Backup configuration of ML2 ##################"
+echo "########## Configuring ML2 ##########"
 sleep 7
 
 controlML2=/etc/neutron/plugins/ml2/ml2_conf.ini
@@ -118,11 +125,9 @@ touch $controlML2
 
 cat << EOF >> $controlML2
 [ml2]
-tenant_network_types = vxlan
-type_drivers = flat,vlan,vxlan
-mechanism_drivers = linuxbridge,l2population
-extension_drivers = port_security
-
+type_drivers = flat,vlan,gre,vxlan
+tenant_network_types = gre
+mechanism_drivers = openvswitch
 
 [ml2_type_flat]
 flat_networks = external
@@ -130,42 +135,26 @@ flat_networks = external
 [ml2_type_vlan]
 
 [ml2_type_gre]
+tunnel_id_ranges = 1:1000
+
 [ml2_type_vxlan]
-vni_ranges = 1:1000
 
 [ml2_type_geneve]
-[securitygroup]
-enable_ipset = True
-
-EOF
-
-echo "############ Configuring Linux Bbridge AGENT ############"
-sleep 7 
-
-linuxbridgefile=/etc/neutron/plugins/ml2/linuxbridge_agent.ini 
-
-test -f $linuxbridgefile.orig || cp $linuxbridgefile $linuxbridgefile.orig
-
-cat << EOF >> $linuxbridgefile
-[linux_bridge]
-physical_interface_mappings = external:eth1
-
-[vxlan]
-enable_vxlan = True
-local_ip = $CON_MGNT_IP
-l2_population = True
-
-
-[agent]
-prevent_arp_spoofing = True
-
 
 [securitygroup]
 enable_security_group = True
-firewall_driver = neutron.agent.linux.iptables_firewall.IptablesFirewallDriver
+enable_ipset = True
+firewall_driver = neutron.agent.linux.iptables_firewall.OVSHybridIptablesFirewallDriver
+
+[ovs]
+local_ip = $CON_MGNT_IP
+bridge_mappings = external:br-ex
+
+[agent]
+tunnel_types = gre
+
 
 EOF
-
 
 echo "############ Configuring L3 AGENT ############"
 sleep 7 
@@ -177,13 +166,12 @@ touch $netl3agent
 
 cat << EOF >> $netl3agent
 [DEFAULT]
-interface_driver = neutron.agent.linux.interface.BridgeInterfaceDriver
+interface_driver = neutron.agent.linux.interface.OVSInterfaceDriver
 external_network_bridge =
+router_delete_namespaces = True
 verbose = True
 
-
 [AGENT]
-
 EOF
 
 
@@ -198,20 +186,18 @@ touch $netdhcp
 
 cat << EOF >> $netdhcp
 [DEFAULT]
-interface_driver = neutron.agent.linux.interface.BridgeInterfaceDriver
+interface_driver = neutron.agent.linux.interface.OVSInterfaceDriver
 dhcp_driver = neutron.agent.linux.dhcp.Dnsmasq
-enable_isolated_metadata = True
-
+dhcp_delete_namespaces = True
 verbose = True
 dnsmasq_config_file = /etc/neutron/dnsmasq-neutron.conf
 
 [AGENT]
-
 EOF
 
 echo "Fix loi MTU"
 sleep 3
-echo "dhcp-option-force=26,1450" > /etc/neutron/dnsmasq-neutron.conf
+echo "dhcp-option-force=26,1454" > /etc/neutron/dnsmasq-neutron.conf
 killall dnsmasq
 
 
@@ -225,11 +211,9 @@ touch $netmetadata
 
 cat << EOF >> $netmetadata
 [DEFAULT]
-verbose = True
-
 auth_uri = http://$CON_MGNT_IP:5000
 auth_url = http://$CON_MGNT_IP:35357
-auth_region = regionOne
+auth_region = RegionOne
 auth_plugin = password
 project_domain_id = default
 user_domain_id = default
@@ -238,8 +222,8 @@ username = neutron
 password = $NEUTRON_PASS
 
 nova_metadata_ip = $CON_MGNT_IP
-
 metadata_proxy_shared_secret = $METADATA_SECRET
+verbose = True
 
 EOF
 #
@@ -257,7 +241,7 @@ service nova-conductor restart
 echo "########## Restarting NEUTRON service ##########"
 sleep 7 
 service neutron-server restart
-service neutron-plugin-linuxbridge-agent restart
+service neutron-plugin-openvswitch-agent restart
 service neutron-dhcp-agent restart
 service neutron-metadata-agent restart
 service neutron-l3-agent restart
@@ -278,7 +262,7 @@ iface lo inet loopback
 # MGNT NETWORK
 auto eth0
 iface eth0 inet static
-address $CON_MGNT_IP
+address 172.16.69.40
 netmask $NETMASK_ADD_MGNT
 
 
