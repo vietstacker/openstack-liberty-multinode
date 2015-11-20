@@ -153,7 +153,6 @@ bridge_mappings = external:br-ex
 [agent]
 tunnel_types = gre
 
-
 EOF
 
 echo "############ Configuring L3 AGENT ############"
@@ -173,7 +172,6 @@ verbose = True
 
 [AGENT]
 EOF
-
 
 echo "############  Configuring DHCP AGENT ############ "
 sleep 7 
@@ -264,9 +262,9 @@ iface lo inet loopback
 # The primary network interface
 auto br-ex
 iface br-ex inet static
-address $NET_EXT_IP
-netmask $NETMASK_ADD
-gateway $GATEWAY_IP
+address $CON_EXT_IP
+netmask $NETMASK_ADD_EXT
+gateway $GATEWAY_IP_EXT
 dns-nameservers 8.8.8.8
 
 auto eth1
@@ -278,8 +276,8 @@ iface eth1 inet manual
 
 auto eth0
 iface eth0 inet static
-address $NET_MGNT_IP
-netmask $NETMASK_ADD
+address $CON_MGNT_IP
+netmask $NETMASK_ADD_MGNT
 EOF
 
 echo "########## Config br-int and br-ex for OpenvSwitch ##########"
