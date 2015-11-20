@@ -118,6 +118,23 @@ bash 2-liberty-aio-keystone.sh
 source admin-openrc.sh
 ```
 
+- Kiểm tra lại việc cài đặt của Keystone bằng lệnh dưới 
+```sh
+openstack token issue
+```
+
+- Kết quả như dưới là đảm bảo cài đặt Keystone thành công.
+```sh
++------------+----------------------------------+
+| Field      | Value                            |
++------------+----------------------------------+
+| expires    | 2015-11-20T04:36:40.458714Z      |
+| id         | afa93ac41b9f432d989cc6f5c235c44f |
+| project_id | a863f6011c9f4d748a9af23983284a90 |
+| user_id    | 07817eb3060941598fe406312b8aa448 |
++------------+----------------------------------+
+```
+
 ##### Cài đặt GLANCE
 ```sh
 bash 3-liberty-aio-glance.sh
@@ -127,6 +144,7 @@ bash 3-liberty-aio-glance.sh
 ```
 bash 4-liberty-aio-nova.sh
 ```
+- Chọn "Yes" khi cài libguestool
 
 ##### Cài đặt NEUTRON
 - Cài đặt OpenvSwitch và cấu hình lại NIC
