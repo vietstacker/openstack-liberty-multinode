@@ -251,3 +251,44 @@ rm -f /var/lib/neutron/neutron.sqlite
 echo "########## check service Neutron ##########"
 neutron agent-list
 sleep 5
+
+echo "########## Config br-int and br-ex for OpenvSwitch ##########"
+sleep 5
+# ovs-vsctl add-br br-int
+ovs-vsctl add-br br-ex
+ovs-vsctl add-port br-ex eth1
+
+echo "########## Config IP address for br-ex ##########"
+
+ifaces=/etc/network/interfaces
+test -f $ifaces.orig1 || cp $ifaces $ifaces.orig1
+rm $ifaces
+cat << EOF > $ifaces
+# The loopback network interface
+auto lo
+iface lo inet loopback
+
+# The primary network interface
+auto br-ex
+iface br-ex inet static
+address $NET_EXT_IP
+netmask $NETMASK_ADD
+gateway $GATEWAY_IP
+dns-nameservers 8.8.8.8
+
+auto eth1
+iface eth1 inet manual
+   up ifconfig \$IFACE 0.0.0.0 up
+   up ip link set \$IFACE promisc on
+   down ip link set \$IFACE promisc off
+   down ifconfig \$IFACE down
+
+auto eth0
+iface eth0 inet static
+address $NET_MGNT_IP
+netmask $NETMASK_ADD
+EOF
+
+sleep 5
+echo "##### Reboot SERVER #####"
+init 6
