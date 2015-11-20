@@ -43,10 +43,6 @@ sleep 5
 ovs-vsctl add-br br-ex
 ovs-vsctl add-port br-ex eth1
 
-echo "########## Cau hinh dia chi IP cho br-ex ##########"
-
-
-
 
 echo "########## Cau hinh dia chi IP cho br-ex ##########"
 ifaces=/etc/network/interfaces
