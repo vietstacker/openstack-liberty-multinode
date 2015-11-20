@@ -6,4 +6,12 @@
 - Cài đặt gói git
 ```sh
 su -
-git clone 
+apt-get update
+apt-get -y install git 
+git clone https://github.com/vietstacker/openstack-liberty-multinode.git
+mv /root/openstack-liberty-multinode/LIBERTY-U14.04-OVS/ /root/
+rm -rf openstack-liberty-multinode/
+cd LIBERTY-U14.04-OVS/
+chmod +x *.sh
+
+```
