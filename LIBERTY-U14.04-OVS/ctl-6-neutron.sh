@@ -228,7 +228,6 @@ verbose = True
 EOF
 #
 
-
 su -s /bin/sh -c "neutron-db-manage --config-file /etc/neutron/neutron.conf \
   --config-file /etc/neutron/plugins/ml2/ml2_conf.ini upgrade head" neutron
   
@@ -251,12 +250,6 @@ rm -f /var/lib/neutron/neutron.sqlite
 echo "########## check service Neutron ##########"
 neutron agent-list
 sleep 5
-
-echo "########## Config br-int and br-ex for OpenvSwitch ##########"
-sleep 5
-# ovs-vsctl add-br br-int
-ovs-vsctl add-br br-ex
-ovs-vsctl add-port br-ex eth1
 
 echo "########## Config IP address for br-ex ##########"
 
@@ -288,6 +281,12 @@ iface eth0 inet static
 address $NET_MGNT_IP
 netmask $NETMASK_ADD
 EOF
+
+echo "########## Config br-int and br-ex for OpenvSwitch ##########"
+sleep 5
+# ovs-vsctl add-br br-int
+ovs-vsctl add-br br-ex
+ovs-vsctl add-port br-ex eth1
 
 sleep 5
 echo "##### Reboot SERVER #####"
