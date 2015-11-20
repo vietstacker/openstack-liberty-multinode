@@ -83,11 +83,9 @@ apt-get -y install git
 - Sử dụng quyền root để đăng nhập, với Ubuntu 14.04 cần đăng nhập bằng user thường trước, sau đó chuyển qua root bằng lệnh su -
 
 ```sh
-su -
-
 git clone https://github.com/vietstacker/openstack-liberty-multinode.git
 
-mv /root/openstack-liberty-multinode/LIBERTY-U14.04-AIO
+mv /root/openstack-liberty-multinode/LIBERTY-U14.04-AIO /root
 rm -rf openstack-liberty-multinode
 
 cd LIBERTY-U14.04-AIO 
