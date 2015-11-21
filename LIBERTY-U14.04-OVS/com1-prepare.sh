@@ -216,9 +216,9 @@ tunnel_types = gre
 EOF
 
 
-echo "Reset service nova-compute,linuxbridge-agent"
+echo "Reset service nova-compute,openvswitch-agent"
 sleep 5
 service nova-compute restart
-service neutron-plugin-linuxbridge-agent restart
+service neutron-plugin-openvswitch-agent restart
 
 
