@@ -4,6 +4,13 @@
 source config.cfg
 
 #
+
+echo "net.ipv4.conf.all.rp_filter=0" >> /etc/sysctl.conf
+echo "net.ipv4.conf.default.rp_filter=0" >> /etc/sysctl.conf
+echo "net.bridge.bridge-nf-call-iptables=1" >> /etc/sysctl.conf
+echo "net.bridge.bridge-nf-call-ip6tables=1" >> /etc/sysctl.conf
+
+
 echo "##### Install python openstack client ##### "
 apt-get -y install python-openstackclient
 
@@ -34,8 +41,8 @@ sed -i "s/server ntp.ubuntu.com/server $CON_MGNT_IP iburst/g" /etc/ntp.conf
 
 sleep 5
 echo "##### Installl package for NOVA"
-apt-get -y install nova-compute sysfsutils
-apt-get -y install libguestfs-tools
+echo "libguestfs-tools        libguestfs/update-appliance     boolean true"  | debconf-set-selections
+apt-get -y install nova-compute libguestfs-tools sysfsutils 
 
 echo "############ Configuring in nova.conf ...############"
 sleep 5
@@ -118,10 +125,10 @@ service nova-compute restart
 # Remove default nova db
 rm /var/lib/nova/nova.sqlite
 
-echo "##### Install linuxbridge-agent (neutron) on COMPUTE NODE #####"
+echo "##### Install openvswitch-agent (neutron) on COMPUTE NODE #####"
 sleep 10
 
-apt-get -y install neutron-plugin-linuxbridge-agent
+apt-get -y install neutron-plugin-ml2 neutron-plugin-openvswitch-agent
 
 echo "Config file neutron.conf"
 controlneutron=/etc/neutron/neutron.conf
@@ -135,6 +142,10 @@ core_plugin = ml2
 rpc_backend = rabbit
 auth_strategy = keystone
 verbose = True
+
+allow_overlapping_ips = True
+
+service_plugins = router
 
 [matchmaker_redis]
 [matchmaker_ring]
@@ -170,30 +181,40 @@ rabbit_password = $RABBIT_PASS
 [qos]
 EOF
 
-echo "############ Configuring Linux Bbridge AGENT ############"
-sleep 7 
+echo "############ Configuring ml2_conf.ini ############"
+sleep 5
+########
+comfileml2=/etc/neutron/plugins/ml2/ml2_conf.ini
+test -f $comfileml2.orig || cp $comfileml2 $comfileml2.orig
+rm $comfileml2
+touch $comfileml2
+#Update ML2 config file /etc/neutron/plugins/ml2/ml2_conf.ini
+cat << EOF > $comfileml2
+[ml2]
+type_drivers = flat,vlan,gre,vxlan
+tenant_network_types = gre
+mechanism_drivers = openvswitch
 
-linuxbridgefile=/etc/neutron/plugins/ml2/linuxbridge_agent.ini 
+[ml2_type_flat]
+[ml2_type_vlan]
+[ml2_type_gre]
+tunnel_id_ranges = 1:1000
 
-test -f $linuxbridgefile.orig || cp $linuxbridgefile $linuxbridgefile.orig
-
-cat << EOF >> $linuxbridgefile
-[linux_bridge]
-physical_interface_mappings = public:eth1
-
-[vxlan]
-enable_vxlan = True
-local_ip = $COM1_MGNT_IP
-l2_population = True
-
-[agent]
-prevent_arp_spoofing = True
-
+[ml2_type_vxlan]
 [securitygroup]
 enable_security_group = True
-firewall_driver = neutron.agent.linux.iptables_firewall.IptablesFirewallDriver
+enable_ipset = True
+firewall_driver = neutron.agent.linux.iptables_firewall.OVSHybridIptablesFirewallDriver
+
+[ovs]
+local_ip = $COM1_DATA_VM_IP
+enable_tunneling = True
+
+[agent]
+tunnel_types = gre
 
 EOF
+
 
 echo "Reset service nova-compute,linuxbridge-agent"
 sleep 5
