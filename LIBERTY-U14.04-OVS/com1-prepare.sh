@@ -207,7 +207,7 @@ enable_ipset = True
 firewall_driver = neutron.agent.linux.iptables_firewall.OVSHybridIptablesFirewallDriver
 
 [ovs]
-local_ip = $COM1_DATA_VM_IP
+local_ip = $COM1_MGNT_IP
 enable_tunneling = True
 
 [agent]
