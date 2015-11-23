@@ -1,27 +1,16 @@
 ﻿### Các hướng dẫn cài đặt OpenStack Liberty
 
-#### Lịch sử tài liệu
-19.11.2015
-- Hoàn thành hướng dẫn cài đặt theo docs
 
-
-- Hoàn thành tài liệu hướng dẫn + scritp cài đặt OpenStack Liberty AIO trên Ubuntu 14.04
-
-23.11.2015
-- Hoàn thành hướng dẫn thực hiện script OpenStack Liberty 02 node trên Ubuntu 14.04
-
-
-
-#### 3. Thông tin phiên bản
+#### 1. Thông tin phiên bản
 
 | Ngày tạo	   |         Thông tin phiên bản | Người thay đổi       |               Chú ý               |
 | -------------|-----------------------------| ---------------------|--------------|------------------------| 
 | 19.11.2015   |   - Hoàn thành hướng dẫn cài đặt theo docs | VietStack Team |        |
-| 20.11.2015   |  Hoàn thành tài liệu hướng dẫn + scritp cài đặt OpenStack Liberty AIO trên Ubuntu 14.04 | | | 
-| 23.11.2015   |Hoàn thành hướng dẫn thực hiện script OpenStack Liberty 02 node trên Ubuntu 14.04 | | | |
+| 20.11.2015   |  Hoàn thành tài liệu hướng dẫn + scritp cài đặt OpenStack Liberty AIO trên Ubuntu 14.04 |  VietStack Team| | 
+| 23.11.2015   |Hoàn thành hướng dẫn thực hiện script OpenStack Liberty 02 node trên Ubuntu 14.04 |  VietStack Team| | |
 
 
-#### Update các hướng dẫn tại đây
+#### 2. Update các hướng dẫn tại đây
 - Lựa chọn một trong các lựa chọn dưới.
 
 ##### Option 1: Hướng dẫn cài đặt theo kiểu step by step (sử dụng Linux Bridge cho Neutron)
