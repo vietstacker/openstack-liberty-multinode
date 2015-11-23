@@ -1,41 +1,41 @@
-# Cài đặt & HDSD OpenStack LIBERTY AIO
+# Installation and User Guide for OpenStack LIBERTY AIO
 
-### Giới thiệu
-- Script cài đặt OpenStack Liberty trên một máy chủ
-- Các thành phần cài đặt bao gồm
+### Introduction
+- The script is used to install OpenStack LIBERTY on ONLY one server
+- Required components:
   - MariaDB, NTP
   - Keystone Version 3
   - Glance
   - Neutron (ML2, OpenvSwitch)
   
-### Môi trường cài đặt
-- LAB trên Vmware Workstation hoặc máy vật lý, đáp ứng yêu cầu tối thiểu sau:
+### Environment
+- Installing on VMware workstation or physical servers which required the following: 
 ```sh
  - RAM: 4GB
  - HDD
-  - HDD1: 60GB (cài OS và các thành phần của OpenStack)
-  - HDD2: 40GB (sử dụng để cài CINDER - cung cấp VOLUME cho OpenStack) - CHÚ Ý: NẾU KHÔNG CÀI CINDER THÌ KHÔNG CẦN Ổ NÀY
- - 02 NIC với thứ tự sau
+  - HDD1: 60GB (used for installing OS and OpenStack components)
+  - HDD2: 40GB (used for installing CINDER which provides VOLUME for OpenStack) - NOTE: IF YOU DO NOT INSTALL THIS SERVICE, THIS STEP IS OPTIONAL.
+ - 02 NIC with the following order: 
   - NIC 1:  - eth0 - Management Network
   - NIC 2: - eth1 - External Network
- - CPU hỗ trợ ảo hóa
+ - CPU supports virtulization
 ```
 
 ### Các bước thực hiện
 
-#### Chuẩn bị môi trường trên VMware
-Thiết lập cấu hình như bên dưới, lưu ý:
-- NIC1: Sử dụng Vmnet 1 hoặc hostonly
-- NIC2: Sử dụng bridge
-- CPU: 2x2, nhớ chọn VT
+#### VMware Environmen Preparation
+Set up configuration like the following, NOTE THAT:
+- NIC1: using Vmnet 1 or hostonly
+- NIC2: using bridge
+- CPU: 2x2, remebering to select VT
 
 ![Topo-liberty](/images/VMware1.png)
 
-#### Lựa chọn 1:  Thực hiện cài đặt bằng 01 duy nhất.
-- Nếu chọn lựa chọn 1 thì sau khi cài xong chuyển qua bước sử dụng dashboard luôn, bỏ qua lựa chọn 2
+#### Option 1: Only use this option during the installation
+- After finish the installation steps, if you choose this option remember to move to the step of using DASHBOARD immediately. Please do not try the second option.
 
-#### Tải GIT và cấu hình ip động cho các card mạng.
-- Cấu hình network bằng đoạn lệnh sau để đảm bảo máy chủ có 02 NIC
+#### Download GIT and configure DHCP for all NICs.
+- Using these following commands for network configuration to make sure your server will have enough 02 NICs.
 ```sh
 
 cat << EOF > /etc/network/interfaces
@@ -53,12 +53,12 @@ EOF
 
 ```
 
-- Khởi động lại network
+- Network restarting
 ```sh
 ifdown -a && ifup -a
 ```
 
-- Kiểm tra lại địa chỉ IP của máy cài OpenStack, đảm bảo có đủ 02 NIC bằng lệnh `landscape-sysinfo`
+- Using the `landscape-sysinfo` command to make sure your server had enough 02 NICs. Then check the ip address again for installed Openstack server.
 
 ```sh
 root@controller:~# landscape-sysinfo
@@ -69,7 +69,7 @@ root@controller:~# landscape-sysinfo
   Swap usage:   0%                
 ```
 
-- Kiểm tra kết nối internet bằng lệnh `ping google.com`
+- Check Internet connection with the `ping google.com` command.
 ```sh
 root@controller:~# ping google.com
 
@@ -79,14 +79,14 @@ PING google.com (203.162.236.211) 56(84) bytes of data.
 64 bytes from 203.162.236.211: icmp_seq=3 ttl=57 time=0.781 ms
 
 ```
-- Cài đặt git với quền root
+- Install GIT with root permission
 ```sh
 su -
 apt-get update
 apt-get -y install git
 ```
 
-- Thực thi script để đặt địa chỉ IP tĩnh cho máy cài OpenStack
+- Execucte the script to set up static IP address for the installed OpenStack server.
 ```sh
 git clone https://github.com/vietstacker/openstack-liberty-multinode.git
 
@@ -97,19 +97,19 @@ cd LIBERTY-U14.04-AIO
 chmod +x *.sh
 bash AIO-LIBERTY-1.sh 
 ```
-- Máy sẽ khởi động lại, đăng nhập và thực hiện script tiếp theo
-- Thực thi script cài đặt toàn bộ các thành phần còn lại
+- The server will be restarted. You need to login and execute the next script.
+- Execute the script for installing all remain components.
 ```sh
 bash AIO-LIBERTY-2.sh
 ```
-- Chờ khoảng 30-60 phút để thực hiện tải và cấu hình các dịch vụ sau đó chuyển qua bước tạo network, tạo VM. 
-- Kết thúc việc cài đặt OpenStack
+- Wait for 30-60 minutes for dowloading, configuring the services. Then move to the step of creating network and VMs. 
+- Openstack Installation finished here!
 
 
-#### Lựa chọn 2:  Thực hiện cài đặt theo từng script
-#### Tải script và thực thi script
-- Tải script
-- Sử dụng quyền root để đăng nhập, với Ubuntu 14.04 cần đăng nhập bằng user thường trước, sau đó chuyển qua root bằng lệnh su -
+#### Option 2:  Execute each script
+#### Download and execute the script
+- Download script
+- Login with root permission, in version Ubuntu 14.04 you must login with normal user first, then move to the root user using su - command
 
 ```sh
 git clone https://github.com/vietstacker/openstack-liberty-multinode.git
@@ -121,38 +121,38 @@ cd LIBERTY-U14.04-AIO
 chmod +x *.sh
 ```
 
-##### Thực thi script đặt IP cho các card mạng
-- Script sẽ thực hiện tự động việc đặt IP tĩnh cho các card mạng
+##### Execute the script to set up IP address for all NICs.
+- The script will be execute automatically to set up static IP address for all NICs.
 ```sh
 bash 0-liberty-aio-ipadd.sh
 ```
 
-##### Cài đặt các gói NTP, MARIADB, RABBITMQ
-- Đăng nhập lại máy chủ với quyền root và thực thi script
+##### Install NTP, MARIADB, RABBITMQ packages
+- Login to the server again with root account. Then do the following script.
 ```sh
 su -
 cd LIBERTY-U14.04-AIO 
 bash 1-liberty-aio-prepare.sh
 ```
-- Sau khi thực hiện script trên xong, máy chủ sẽ khởi động lại.
+- When the script is executed. The server will be restarted right after that.
 
-##### Cài đặt Keystone
-- Thực thi script dưới để cài đặt Keystone
+##### Install Keystone
+- Use the following script to install Keystone
 ```sh
 bash 2-liberty-aio-keystone.sh
 ```
 
-- Thực thi lệnh dưới để khai báo biến môi trường cho OpenStack
+- Execute the below command to populate environment variables for OpenStack
 ```sh
 source admin-openrc.sh
 ```
 
-- Kiểm tra lại việc cài đặt của Keystone bằng lệnh dưới 
+- Use the below script to check whether the installed Keystone is OK or not. 
 ```sh
 openstack token issue
 ```
 
-- Kết quả như dưới là đảm bảo cài đặt Keystone thành công.
+- If the result is shown like this. Your installation is succeeded. 
 ```sh
 +------------+----------------------------------+
 | Field      | Value                            |
@@ -164,98 +164,98 @@ openstack token issue
 +------------+----------------------------------+
 ```
 
-##### Cài đặt GLANCE
+##### Install GLANCE
 ```sh
 bash 3-liberty-aio-glance.sh
 ```
 
-##### Cài đặt NOVA
+##### Install NOVA
 ```
 bash 4-liberty-aio-nova.sh
 ```
 
-##### Cài đặt NEUTRON
-- Cài đặt OpenvSwitch và cấu hình lại NIC
+##### Install NEUTRON
+- Install OpenvSwitch and re-configure NIC
 ```sh
 bash 5-liberty-aio-config-ip-neutron.sh
 ```
-- Sau khi thực thi xong script trên, máy chủ sẽ khởi động lại. Đăng nhập với quyền root và tiếp tục thực hiện lệnh dưới để cài NEUTRON
+- After running the script successfully, your server will be restarted. You need to login with root account in order to finish the bellow script for installing NEUTRON.
 
 ```sh
 bash 6-liberty-aio-install-neutron.sh
 ```
 
-##### Cài đặt Horizon
+##### Install Horizon
 ```
 bash 7-liberty-aio-install-horizon.sh
 ```
 
-## Hướng dẫn sử dụng dashboard để tạo network, VM, tạo các rule.
-### Tạo rule cho project admin
-- Đăng nhập vào dasboard
+## User Guide for using dashboard to create network, VM, rules.
+### Create rule for admin project
+- Login to the dashboard
 ![liberty-horizon1.png](/images/liberty-horizon1.png)
 
-- Chọn tab `admin => Access & Security => Manage Rules`
+- Select `admin => Access & Security => Manage Rules` tab
 ![liberty-horizon2.png](/images/liberty-horizon2.png)
 
-- Chọn tab `Add Rule`
+- Select `Add Rule` tab
 ![liberty-horizon3.png](/images/liberty-horizon3.png)
 
-- Mở rule cho phép từ bên ngoài SSH đến máy ảo
+- Open rule which allow user to access to the VMs via SSH
 ![liberty-horizon4.png](/images/liberty-horizon4.png)
 - Làm tương tự với rule ICMP để cho phép ping tới máy ảo và các rule còn lại.
 
-### Tạo network
-#### Tạo dải external network
-- Chọn tab `Admin => Networks => Create Network`
+### Create network
+#### Create external network
+- Select `Admin => Networks => Create Network`tab
 ![liberty-net-ext1.png](/images/liberty-net-ext1.png)
 
-- Nhập và chọn các tab như hình dưới.
+- Enter and choose like the following images
 ![liberty-net-ext2.png](/images/liberty-net-ext2.png)
 
-- Click vào mục `ext-net` vừa tạo để khai báo subnet cho dải external.
+- Click to `ext-net` to declare subnet mask for the external network
 ![liberty-net-ext3.png](/images/liberty-net-ext3.png)
 
-- Chọn tab `Creat Subnet`
+- Select `Creat Subnet` tab
 ![liberty-net-ext4.png](/images/liberty-net-ext4.png)
 
-- Khai báo dải IP của subnet cho dải external 
+- Initialize IP range for subnet of external network 
 ![liberty-net-ext5.png](/images/liberty-net-ext5.png)
 
-- Khai báo pools và DNS
+- Declare pools and DNS
 ![liberty-net-ext6.png](/images/liberty-net-ext6.png)
 
-#### Tạo dải internal network
-- Lựa chọn các tab lần lượt theo thứ tự `Project admin => Network => Networks => Create Network"
+#### Create the internal network
+- Select the tabs with order of `Project admin => Network => Networks => Create Network"
 ![liberty-net-int1.png](/images/liberty-net-int1.png)
 
-- Khai báo tên cho internal network
+- Initialize for the internal network
 ![liberty-net-int2.png](/images/liberty-net-int2.png)
 
-- Khai báo subnet cho internal network
+- Declare subnet for the internal network
 ![liberty-net-int3.png](/images/liberty-net-int3.png)
 
-- Khai báo dải IP cho Internal network
+- Declare IP range for the internal network
 ![liberty-net-int4.png](/images/liberty-net-int4.png)
 
-#### Tạo Router cho project admin
-- Lựa chọn theo các tab "Project admin => Routers => Create Router
+#### Create a Router for admin project
+- Select the tabs with order of "Project admin => Routers => Create Router
 ![liberty-r1.png](/images/liberty-r1.png)
 
-- Tạo tên router và lựa chọn như hình
+- Input router name and do like in the below image
 ![liberty-r2.png](/images/liberty-r2.png)
 
-- Gán interface cho router
+- Assign interface for the router
 ![liberty-r3.png](/images/liberty-r3.png)
 
 ![liberty-r4.png](/images/liberty-r4.png)
 
 ![liberty-r5.png](/images/liberty-r5.png)
-- Kết thúc các bước tạo exteral network, internal network, router
+- END the steps of creating exteral network, internal network and router
 
 
-## Tạo máy ảo (Instance)
-- Lựa chọn các tab dưới `Project admin => Instances => Launch Instance`
+## Create Instance
+- Select the tabs with order of `Project admin => Instances => Launch Instance`
 ![liberty-instance1.png](/images/liberty-instance1.png)
 
 ![liberty-instance2.png](/images/liberty-instance2.png)
