@@ -105,6 +105,14 @@ Sau khi cài đặt xong COMPUTE NODE, chuyển qua bước sử dụng dashboad
 - Chọn tab `Add Rule`
 ![liberty-horizon3.png](/images/liberty-horizon3.png)
 
+- Mở rule cho phép từ bên ngoài SSH đến máy ảo
+![liberty-horizon4.png](/images/liberty-horizon4.png)
+- Làm tương tự với rule ICMP để cho phép ping tới máy ảo và các rule còn lại.
+
+### Tạo network
+#### Tạo dải external network
+
+
 
 
 
