@@ -19,6 +19,8 @@ chmod +x *.sh
 
 ## Cài đặt trên CONTROLLER NODE
 ### Cài đặt script thiết lập IP và repos cho Liberty
+- Sửa file config trong thư mục cho phù hợp với IP mà bạn dự định sử dụng.
+ 
 ```sh
 bash ctl-1-ipadd.sh
 ```
