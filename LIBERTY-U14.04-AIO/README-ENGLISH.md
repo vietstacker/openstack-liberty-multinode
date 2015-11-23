@@ -31,8 +31,8 @@ Set up configuration like the following, NOTE THAT:
 
 ![Topo-liberty](/images/VMware1.png)
 
-#### Option 1: Only use this option during the installation if you choose this
-- After finish the installation steps, if you choose this option remember to move to the step of using DASHBOARD immediately. Please do not try the second option.
+#### Option 1: Only use this option during the installation if you choose this one
+- After finish the installation steps, if you choose this option remembering to move to the step of using DASHBOARD immediately. Please do not try the second option.
 
 #### Download GIT and configure DHCP for all NICs.
 - Using these following commands for network configuration to make sure your server will have enough 02 NICs.
@@ -58,7 +58,7 @@ EOF
 ifdown -a && ifup -a
 ```
 
-- Using the `landscape-sysinfo` command to make sure your server had enough 02 NICs. Then check the ip address again for installed Openstack server.
+- Using the `landscape-sysinfo` command to ensure your server had enough 02 NICs. Then check the ip address again on the installed Openstack server.
 
 ```sh
 root@controller:~# landscape-sysinfo
@@ -69,7 +69,7 @@ root@controller:~# landscape-sysinfo
   Swap usage:   0%                
 ```
 
-- Check Internet connection with the `ping google.com` command.
+- Check the Internet connection with the `ping google.com` command.
 ```sh
 root@controller:~# ping google.com
 
@@ -86,7 +86,7 @@ apt-get update
 apt-get -y install git
 ```
 
-- Execucte the script to set up static IP address for the installed OpenStack server.
+- Execute the script to set up static IP address for the installed OpenStack server.
 ```sh
 git clone https://github.com/vietstacker/openstack-liberty-multinode.git
 
@@ -97,8 +97,8 @@ cd LIBERTY-U14.04-AIO
 chmod +x *.sh
 bash AIO-LIBERTY-1.sh 
 ```
-- The server will be restarted. You need to login and execute the next script.
-- Execute the script for installing all remain components.
+- The server will be restarted. You need to login again, then execute the next script.
+- Execute the script for installing all remaining components.
 ```sh
 bash AIO-LIBERTY-2.sh
 ```
@@ -109,7 +109,7 @@ bash AIO-LIBERTY-2.sh
 #### Option 2:  Execute each script
 #### Download and execute the script
 - Download script
-- Login with root permission, in version Ubuntu 14.04 you must login with normal user first, then move to the root user using su - command
+- Login with root permission, in Ubuntu version of 14.04 you must login with normal user first, then move to the root user using `su - ` command
 
 ```sh
 git clone https://github.com/vietstacker/openstack-liberty-multinode.git
@@ -122,13 +122,13 @@ chmod +x *.sh
 ```
 
 ##### Execute the script to set up IP address for all NICs.
-- The script will be execute automatically to set up static IP address for all NICs.
+- The script will be executed automatically to set up static IP address for all NICs.
 ```sh
 bash 0-liberty-aio-ipadd.sh
 ```
 
 ##### Install NTP, MARIADB, RABBITMQ packages
-- Login to the server again with root account. Then do the following script.
+- Login to the server again with root account. Then do the following scripts.
 ```sh
 su -
 cd LIBERTY-U14.04-AIO 
@@ -201,16 +201,16 @@ bash 7-liberty-aio-install-horizon.sh
 - Select `Add Rule` tab
 ![liberty-horizon3.png](/images/liberty-horizon3.png)
 
-- Open rule which allow user to access to the VMs via SSH
+- Open rule which allows user to access to the VMs via SSH
 ![liberty-horizon4.png](/images/liberty-horizon4.png)
-- Làm tương tự với rule ICMP để cho phép ping tới máy ảo và các rule còn lại.
+- Do the same with ICMP rule so that ping to virtual machines is allowed and other rules
 
 ### Create network
 #### Create external network
 - Select `Admin => Networks => Create Network`tab
 ![liberty-net-ext1.png](/images/liberty-net-ext1.png)
 
-- Enter and choose like the following images
+- Enter the informatioin and choose like the following image
 ![liberty-net-ext2.png](/images/liberty-net-ext2.png)
 
 - Click to `ext-net` to declare subnet mask for the external network
@@ -219,14 +219,14 @@ bash 7-liberty-aio-install-horizon.sh
 - Select `Creat Subnet` tab
 ![liberty-net-ext4.png](/images/liberty-net-ext4.png)
 
-- Initialize IP range for subnet of external network 
+- Initialize IP range for subnet of the external network 
 ![liberty-net-ext5.png](/images/liberty-net-ext5.png)
 
 - Declare pools and DNS
 ![liberty-net-ext6.png](/images/liberty-net-ext6.png)
 
 #### Create the internal network
-- Select the tabs with order of `Project admin => Network => Networks => Create Network"
+- Select the tabs with the order of `Project admin => Network => Networks => Create Network"
 ![liberty-net-int1.png](/images/liberty-net-int1.png)
 
 - Initialize for the internal network
@@ -239,7 +239,7 @@ bash 7-liberty-aio-install-horizon.sh
 ![liberty-net-int4.png](/images/liberty-net-int4.png)
 
 #### Create a Router for admin project
-- Select the tabs with order of "Project admin => Routers => Create Router
+- Select the tabs with the order of "Project admin => Routers => Create Router
 ![liberty-r1.png](/images/liberty-r1.png)
 
 - Input router name and do like in the below image
