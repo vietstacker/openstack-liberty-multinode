@@ -17,10 +17,8 @@
 | Ngày tạo	   |         Thông tin phiên bản | Người thay đổi       |               Chú ý               |
 | -------------|-----------------------------| ---------------------|--------------|------------------------| 
 | 19.11.2015   |   - Hoàn thành hướng dẫn cài đặt theo docs | VietStack Team |        |
-| -------------|-----------------------------| ---------------------|--------------|------------------------| 
-| 20.11.2015 |  Hoàn thành tài liệu hướng dẫn + scritp cài đặt OpenStack Liberty AIO trên Ubuntu 14.04 | | | 
-| -------------|-----------------------------| ---------------------|--------------|------------------------| 
-| 23.11.2015|Hoàn thành hướng dẫn thực hiện script OpenStack Liberty 02 node trên Ubuntu 14.04 | | | |
+| 20.11.2015   |  Hoàn thành tài liệu hướng dẫn + scritp cài đặt OpenStack Liberty AIO trên Ubuntu 14.04 | | | 
+| 23.11.2015   |Hoàn thành hướng dẫn thực hiện script OpenStack Liberty 02 node trên Ubuntu 14.04 | | | |
 
 
 #### Update các hướng dẫn tại đây
