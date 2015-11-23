@@ -8,8 +8,8 @@
   - Glance
   - Neutron (ML2, OpenvSwitch)
   
-### Environment
-- Installing on VMware workstation or physical servers which required the following: 
+### Before you begin
+- Install on VMware workstation or physical servers as the following requirements:
 ```sh
  - RAM: 4GB
  - HDD
@@ -21,9 +21,9 @@
  - CPU supports virtulization
 ```
 
-### Các bước thực hiện
+### Installation steps
 
-#### VMware Environmen Preparation
+#### VMware Environment Preparation
 Set up configuration like the following, NOTE THAT:
 - NIC1: using Vmnet 1 or hostonly
 - NIC2: using bridge
@@ -31,7 +31,7 @@ Set up configuration like the following, NOTE THAT:
 
 ![Topo-liberty](/images/VMware1.png)
 
-#### Option 1: Only use this option during the installation
+#### Option 1: Only use this option during the installation if you choose this
 - After finish the installation steps, if you choose this option remember to move to the step of using DASHBOARD immediately. Please do not try the second option.
 
 #### Download GIT and configure DHCP for all NICs.
