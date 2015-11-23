@@ -13,7 +13,7 @@ HDD: 60GB
 ```
 
 
-#### Configure NODE CONTROLLER
+#### Configure CONTROLLER NODE
 ```sh
 RAM: 4GB
 CPU: 2x2, VT supported
