@@ -1,29 +1,29 @@
-# Các bước thực hiện
+# Installation Steps
 
-### Chuẩn bị môi trường LAB
-- Sử dụng trong môi trường VMware Workstation
+### Prepare LAB enviroment
+- Using in VMware Workstation enviroment
 
-#### Cấu hình NODE CONTROLLER
+#### Configure CONTROLLER NODE
 ```sh
 RAM: 4GB
-CPU: 2x2, có hỗ trợ VT
-NIC1: eth0: 10.10.10.0/24 (dải interntel, sử dụng vmnet hoặc hostonly trong VMware Workstation)
-NIC2: eth1: 172.16.69.0/24, gateway 172.16.69.1 (dải external - sử dụng chế độ NAT hoặc Bridge VMware Workstation)
+CPU: 2x2,  VT supported
+NIC1: eth0: 10.10.10.0/24 (interntel range, using vmnet or hostonly in VMware Workstation)
+NIC2: eth1: 172.16.69.0/24, gateway 172.16.69.1 (external range - using NAT or Bridge VMware Workstation)
 HDD: 60GB
 ```
 
 
-#### Cấu hình NODE CONTROLLER
+#### Configure NODE CONTROLLER
 ```sh
 RAM: 4GB
-CPU: 2x2, có hỗ trợ VT
-NIC1: eth0: 10.10.10.0/24 (dải interntel, sử dụng vmnet hoặc hostonly trong VMware Workstation)
-NIC2: eth1: 172.16.69.0/24, gateway 172.16.69.1 (dải external - sử dụng chế độ NAT hoặc Bridge VMware Workstation  )
+CPU: 2x2, VT supported
+NIC1: eth0: 10.10.10.0/24 (interntel range, using vmnet or hostonly in VMware Workstation)
+NIC2: eth1: 172.16.69.0/24, gateway 172.16.69.1 (external range - using NAT or Bridge VMware Workstation  )
 HDD: 1000GB
 ```
 
-### Thực thi script
-- Cài đặt gói git và tải script 
+### Execute script
+- Install git package and dowload script 
 ```sh
 su -
 apt-get update
@@ -37,56 +37,56 @@ chmod +x *.sh
 
 ```
 
-## Cài đặt trên CONTROLLER NODE
-### Cài đặt script thiết lập IP và repos cho Liberty
-- Sửa file config trong thư mục cho phù hợp với IP mà bạn dự định sử dụng.
+## Install on CONTROLLER NODE
+### install IP establishment script and repos for Liberty
+- Edit file config in dicrectory with IP that you want to use.
  
 ```sh
 bash ctl-1-ipadd.sh
 ```
 
-### Cài đặt gói NTP, MariaDB
+### Install NTP, MariaDB packages
 ```sh
 bash ctl-2-prepare.sh
 ```
 
-### Cài đặt KEYSTONE
-- Cài đặt Keystone
+### Install KEYSTONE
+- Install Keystone
 ```sh
 bash ctl-3.keystone.sh
 ```
 
-- Khai báo biến môi trường
+- Declare enviroment parameter
 ```sh
 source admin-openrc.sh
 ```
 
-### Cài đặt GLANCE
+### Install GLANCE
 ```sh
 bash ctl-4-glance.sh
 ```
 
-### Cài đặt NOVA
+### Install NOVA
 ```sh
 bash ctl-5-nova.sh
 ```
 
-### Cài đặt NEUTRON
+### Install NEUTRON
 ```sh
 bash ctl-6-neutron.sh
 ```
-- Sau khi cài đặt NEUTRON xong, node controller sẽ khởi động lại.
-- Đăng nhập bằng `root` và thực thi script cài đặt Horizon
+- After NEUTRON installation done, controller node will restart.
+- Login with `root` end execute Horizon installation script.
 
-### Cài đặt HORIZON
-- Đăng nhập với quyền `root` và thực hiện script sau
+### Install HORIZON
+- Login with  `root` privilege and execute script below
 ```sh
 bash ctl-horizon.sh
 ```
 
-## Cài đặt trên COMPUTE NODE
-### Tải GIT và script
-- Cài đặt gói git và tải script 
+## Install on COMPUTE NODE
+### Dowload GIT and script
+- install git package and dowload script 
 ```sh
 su -
 apt-get update
@@ -98,14 +98,14 @@ rm -rf openstack-liberty-multinode/
 cd LIBERTY-U14.04-OVS/
 chmod +x *.sh
 
-### Thiết lập IP và hostname
-- Sửa file config để có IP phù hợp với máy hiện tại.
-- Thực thi script để thiết lập IP, hostname
+### Establish IP and hostname
+- Edit file config to make it suitable with your IP.
+- Execute script to establish IP, hostname
 ```sh
 bash com1-ipdd.sh
 ```
-- Máy chủ sẽ khởi động lại sau khi thực thi script `com1-ipdd.sh`
-- Đăng nhập vào máy chủ với quyền root và thực thi script cài đặt các thành phần lên nova
+- The server will restart after script `com1-ipdd.sh` is executed.
+- Login to server with root privilege and execute conponents installation script on Nova
 
 ```sh
 su -
@@ -113,81 +113,81 @@ cd LIBERTY-U14.04-OVS/
 bash com1-prepare.sh
 ```
 
-Sau khi cài đặt xong COMPUTE NODE, chuyển qua bước sử dụng dashboad
+After install COMPUTE NODE, move to step that guide to use dashboard
 
 
-## Hướng dẫn sử dụng dashboard để tạo network, VM, tạo các rule.
-### Tạo rule cho project admin
-- Đăng nhập vào dasboard
+## Using dashboard to initialize network, VM, rules.
+### Initialize rule for project admin
+- Login to dasboard
 ![liberty-horizon1.png](/images/liberty-horizon1.png)
 
-- Chọn tab `admin => Access & Security => Manage Rules`
+- Select tab `admin => Access & Security => Manage Rules`
 ![liberty-horizon2.png](/images/liberty-horizon2.png)
 
-- Chọn tab `Add Rule`
+- Select tab `Add Rule`
 ![liberty-horizon3.png](/images/liberty-horizon3.png)
 
-- Mở rule cho phép từ bên ngoài SSH đến máy ảo
+- Open rule to allow SSH from outside to virtual machine
 ![liberty-horizon4.png](/images/liberty-horizon4.png)
-- Làm tương tự với rule ICMP để cho phép ping tới máy ảo và các rule còn lại.
+- Do the same with ICMP rule to allow ping to virtual machine and the other rules.
 
-### Tạo network
-#### Tạo dải external network
-- Chọn tab `Admin => Networks => Create Network`
+### Initialize network
+#### Initialize external network range
+- Select tab `Admin => Networks => Create Network`
 ![liberty-net-ext1.png](/images/liberty-net-ext1.png)
 
-- Nhập và chọn các tab như hình dưới.
+- Enter and select tabs like picture below.
 ![liberty-net-ext2.png](/images/liberty-net-ext2.png)
 
-- Click vào mục `ext-net` vừa tạo để khai báo subnet cho dải external.
+- Click to newly created `ext-net` to declare subnet for external range.
 ![liberty-net-ext3.png](/images/liberty-net-ext3.png)
 
-- Chọn tab `Creat Subnet`
+- Select tab `Creat Subnet`
 ![liberty-net-ext4.png](/images/liberty-net-ext4.png)
 
-- Khai báo dải IP của subnet cho dải external 
+- Declare IP range of subnet for external range
 ![liberty-net-ext5.png](/images/liberty-net-ext5.png)
 
-- Khai báo pools và DNS
+- Declare pools and DNS
 ![liberty-net-ext6.png](/images/liberty-net-ext6.png)
 
-#### Tạo dải internal network
-- Lựa chọn các tab lần lượt theo thứ tự `Project admin => Network => Networks => Create Network"
+#### Initialize internal network range
+- Select tabs in turn of rank : `Project admin => Network => Networks => Create Network"
 ![liberty-net-int1.png](/images/liberty-net-int1.png)
 
-- Khai báo tên cho internal network
+- Declare name for internal network
 ![liberty-net-int2.png](/images/liberty-net-int2.png)
 
-- Khai báo subnet cho internal network
+- Declare subnet for internal network
 ![liberty-net-int3.png](/images/liberty-net-int3.png)
 
-- Khai báo dải IP cho Internal network
+- Declare IP range for Internal network
 ![liberty-net-int4.png](/images/liberty-net-int4.png)
 
-#### Tạo Router cho project admin
-- Lựa chọn theo các tab "Project admin => Routers => Create Router
+#### Initialize Router for project admin
+- Select by tabs "Project admin => Routers => Create Router
 ![liberty-r1.png](/images/liberty-r1.png)
 
-- Tạo tên router và lựa chọn như hình
+- Initialize router name and select like picture below
 ![liberty-r2.png](/images/liberty-r2.png)
 
-- Gán interface cho router
+- Apply interface for router
 ![liberty-r3.png](/images/liberty-r3.png)
 
 ![liberty-r4.png](/images/liberty-r4.png)
 
 ![liberty-r5.png](/images/liberty-r5.png)
-- Kết thúc các bước tạo exteral network, internal network, router
+- ending of initializing steps:  exteral network, internal network, router
 
 
-## Tạo máy ảo (Instance)
-- Lựa chọn các tab dưới `Project admin => Instances => Launch Instance`
+
+## Initialize virtual machine (Instance)
+- L?a ch?n các tab d??i `Project admin => Instances => Launch Instance`
 ![liberty-instance1.png](/images/liberty-instance1.png)
 
 ![liberty-instance2.png](/images/liberty-instance2.png)
 
 ![liberty-instance3.png](/images/liberty-instance3.png)
-
 
 
 
