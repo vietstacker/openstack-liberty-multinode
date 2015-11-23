@@ -95,6 +95,17 @@ Sau khi cài đặt xong COMPUTE NODE, chuyển qua bước sử dụng dashboad
 
 
 ## Hướng dẫn sử dụng dashboard để tạo network, VM, tạo các rule.
+### Tạo rule cho project admin
+- Đăng nhập vào dasboard
+![liberty-horizon1.png](/images/liberty-horizon1.png)
+
+- Chọn tab `admin => Access & Security => Manage Rules`
+![liberty-horizon2.png](/images/liberty-horizon2.png)
+
+- Chọn tab `Add Rule`
+![liberty-horizon3.png](/images/liberty-horizon3.png)
+
+
 
 
 
