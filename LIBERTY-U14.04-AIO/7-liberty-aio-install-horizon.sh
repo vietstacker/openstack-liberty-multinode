@@ -9,12 +9,7 @@ sleep 5
 
 echo "########## Installing Dashboard package ##########"
 apt-get -y install openstack-dashboard 
-
-# echo "########## Fix bug in apache2 ##########"
-# sleep 5
-# Fix bug apache in ubuntu 14.04
-# echo "ServerName localhost" > /etc/apache2/conf-available/servername.conf
-# sudo a2enconf servername 
+apt-get -y remove --auto-remove openstack-dashboard-ubuntu-theme
 
 echo "########## Creating redirect page ##########"
 

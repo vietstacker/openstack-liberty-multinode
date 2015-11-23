@@ -9,6 +9,8 @@ sleep 5
 
 echo "########## Installing Dashboard package ##########"
 apt-get -y install openstack-dashboard 
+apt-get -y remove --auto-remove openstack-dashboard-ubuntu-theme
+
 
 # echo "########## Fix bug in apache2 ##########"
 # sleep 5

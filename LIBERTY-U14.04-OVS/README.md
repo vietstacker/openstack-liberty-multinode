@@ -91,9 +91,10 @@ cd LIBERTY-U14.04-OVS/
 bash com1-prepare.sh
 ```
 
+Sau khi cài đặt xong COMPUTE NODE, chuyển qua bước sử dụng dashboad
 
 
-## Hướng dẫn sử dụng dashboard để tạo network, VM, tạo các rule
+## Hướng dẫn sử dụng dashboard để tạo network, VM, tạo các rule.
 
 
 
