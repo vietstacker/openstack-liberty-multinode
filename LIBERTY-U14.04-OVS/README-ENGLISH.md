@@ -3,7 +3,7 @@
 ### Prepare LAB enviroment
 - Using in VMware Workstation enviroment
 
-#### Configure NODE CONTROLLER
+#### Configure CONTROLLER NODE
 ```sh
 RAM: 4GB
 CPU: 2x2,  VT supported
