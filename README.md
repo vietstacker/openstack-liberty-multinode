@@ -21,10 +21,10 @@ https://github.com/vietstacker/openstack-liberty-multinode/tree/master/LIBERTY-U
 
 Hướng dẫn sử dụng script cài đặt OpenStack Liberty sử dụng Linux Bridge trong Neutron
 ```sh
-updating
+https://github.com/vietstacker/openstack-liberty-multinode/blob/master/LIBERTY-U14.04-LB/README.md
 ```
 
 Hướng dẫn sử dụng script cài đặt OpenStack Liberty sử dụng OpenvSwtich trong Neutron
 ```sh
-updating
+https://github.com/vietstacker/openstack-liberty-multinode/blob/master/LIBERTY-U14.04-OVS/README.md
 ```
