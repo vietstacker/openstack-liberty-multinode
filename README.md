@@ -19,7 +19,12 @@ Hướng dẫn + Script cài đặt OpenStack Liberty AIO trên Ubuntu 14.04
 https://github.com/vietstacker/openstack-liberty-multinode/tree/master/LIBERTY-U14.04-AIO
 ```
 
-Hướng dẫn cài đặt Script 02 node trở lên
+Hướng dẫn sử dụng script cài đặt OpenStack Liberty sử dụng Linux Bridge trong Neutron
+```sh
+updating
+```
+
+Hướng dẫn sử dụng script cài đặt OpenStack Liberty sử dụng OpenvSwtich trong Neutron
 ```sh
 updating
 ```
