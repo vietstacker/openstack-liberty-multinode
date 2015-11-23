@@ -13,7 +13,7 @@
 #### Update các hướng dẫn tại đây
 - Lựa chọn một trong các lựa chọn dưới.
 
-##### Option 1: Hướng dẫn cài đặt theo kiểu step by step
+##### Option 1: Hướng dẫn cài đặt theo kiểu step by step (sử dụng Linux Bridge cho Neutron)
 ```sh 
 VIỆT NAM: https://github.com/vietstacker/openstack-liberty-multinode/blob/master/HuongDanCaiDat_OPenStack_Liberty_docs.md
 ```

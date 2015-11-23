@@ -1,6 +1,25 @@
 # Các bước thực hiện
 
 ### Chuẩn bị môi trường LAB
+- Sử dụng trong môi trường VMware Workstation
+#### Cấu hình NODE CONTROLLER
+```sh
+RAM: 4GB
+CPU: 2x2, có hỗ trợ VT
+NIC1: eth0: 10.10.10.0/24 (dải interntel, sử dụng vmnet hoặc hostonly trong VMware Workstation)
+NIC2: eth1: 172.16.69.0/24, gateway 172.16.69.1 (dải external - sử dụng chế độ NAT hoặc Bridge VMware Workstation)
+HDD: 60GB
+```
+
+
+#### Cấu hình NODE CONTROLLER
+```sh
+RAM: 4GB
+CPU: 2x2, có hỗ trợ VT
+NIC1: eth0: 10.10.10.0/24 (dải interntel, sử dụng vmnet hoặc hostonly trong VMware Workstation)
+NIC2: eth1: 172.16.69.0/24, gateway 172.16.69.1 (dải external - sử dụng chế độ NAT hoặc Bridge VMware Workstation  )
+HDD: 1000GB
+```
 
 ### Thực thi script
 - Cài đặt gói git và tải script 
