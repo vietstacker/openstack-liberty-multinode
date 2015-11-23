@@ -2,6 +2,7 @@
 
 ### Chuẩn bị môi trường LAB
 - Sử dụng trong môi trường VMware Workstation
+
 #### Cấu hình NODE CONTROLLER
 ```sh
 RAM: 4GB
