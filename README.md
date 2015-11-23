@@ -21,17 +21,17 @@ VIỆT NAM: https://github.com/vietstacker/openstack-liberty-multinode/blob/mast
 ##### Option 2:  dẫn + Script cài đặt OpenStack Liberty AIO trên Ubuntu 14.04
 ```sh
 VIỆT NAM: https://github.com/vietstacker/openstack-liberty-multinode/tree/master/LIBERTY-U14.04-AIO
-ENGLISH: updating
+ENGLISH: https://github.com/vietstacker/openstack-liberty-multinode/blob/master/LIBERTY-U14.04-AIO/READE-ENGLISH.md
 ```
 
 ##### Option 3: Hướng dẫn sử dụng script cài đặt OpenStack Liberty sử dụng Linux Bridge trong Neutron
 ```sh
 VIỆT NAM: https://github.com/vietstacker/openstack-liberty-multinode/blob/master/LIBERTY-U14.04-LB/README.md
-ENGLISH: updating
+ENGLISH: https://github.com/vietstacker/openstack-liberty-multinode/blob/master/LIBERTY-U14.04-LB/README-ENGLISH.md
 ```
 
 ##### Option 4: Hướng dẫn sử dụng script cài đặt OpenStack Liberty sử dụng OpenvSwtich trong Neutron
 ```sh
 VIỆT NAM: https://github.com/vietstacker/openstack-liberty-multinode/blob/master/LIBERTY-U14.04-OVS/README.md
-ENGLISH: updating
+ENGLISH: https://github.com/vietstacker/openstack-liberty-multinode/blob/master/LIBERTY-U14.04-OVS/README-ENGLISH.md
 ```
