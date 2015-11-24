@@ -30,7 +30,7 @@ sleep 5
 apt-get -y install nova-api nova-cert nova-conductor nova-consoleauth nova-novncproxy nova-scheduler python-novaclient
 
 # Cai tu dong libguestfs-tools 
-echo "libguestfs-tools        libguestfs/update-appliance     boolean true"  | debconf-set-selections
+# echo "libguestfs-tools        libguestfs/update-appliance     boolean true"  | debconf-set-selections
 apt-get -y install libguestfs-tools sysfsutils
 
 ######## Backup configurations for NOVA ##########"
@@ -68,6 +68,7 @@ firewall_driver = nova.virt.firewall.NoopFirewallDriver
 enabled_apis=osapi_compute,metadata
 verbose = True
 
+enable_instance_password = True
 
 [database]
 connection = mysql+pymysql://nova:$NOVA_DBPASS@$CON_MGNT_IP/nova
@@ -109,7 +110,13 @@ username = neutron
 password = $NEUTRON_PASS
 
 service_metadata_proxy = True
-metadata_proxy_shared_secret = $DEFAULT_PASS
+metadata_proxy_shared_secret = $METADATA_SECRET
+
+[libvirt]
+inject_key = True
+inject_partition = -1
+inject_password = True
+
 
 EOF
 

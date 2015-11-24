@@ -41,7 +41,7 @@ sed -i "s/server ntp.ubuntu.com/server $CON_MGNT_IP iburst/g" /etc/ntp.conf
 
 sleep 5
 echo "##### Installl package for NOVA"
-echo "libguestfs-tools        libguestfs/update-appliance     boolean true"  | debconf-set-selections
+# echo "libguestfs-tools        libguestfs/update-appliance     boolean true"  | debconf-set-selections
 apt-get -y install nova-compute libguestfs-tools sysfsutils 
 
 echo "############ Configuring in nova.conf ...############"
@@ -77,6 +77,7 @@ firewall_driver = nova.virt.firewall.NoopFirewallDriver
 
 verbose = True
 
+enable_instance_password = True
 
 [oslo_messaging_rabbit]
 rabbit_host = $CON_MGNT_IP
@@ -115,6 +116,11 @@ region_name = RegionOne
 project_name = service
 username = neutron
 password = $NEUTRON_PASS
+
+[libvirt]
+inject_key = True
+inject_partition = -1
+inject_password = True
 
 EOF
 

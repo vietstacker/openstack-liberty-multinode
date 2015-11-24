@@ -70,6 +70,7 @@ firewall_driver = nova.virt.firewall.NoopFirewallDriver
 
 verbose = True
 
+enable_instance_password = True
 
 [oslo_messaging_rabbit]
 rabbit_host = $CON_MGNT_IP
@@ -108,6 +109,11 @@ region_name = RegionOne
 project_name = service
 username = neutron
 password = $NEUTRON_PASS
+
+[libvirt]
+inject_key = True
+inject_partition = -1
+inject_password = True
 
 EOF
 
