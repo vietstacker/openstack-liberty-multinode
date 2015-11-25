@@ -30,8 +30,8 @@ sleep 5
 apt-get -y install nova-api nova-cert nova-conductor nova-consoleauth nova-novncproxy nova-scheduler python-novaclient
 
 # Cai tu dong libguestfs-tools 
-# echo "libguestfs-tools        libguestfs/update-appliance     boolean true"  | debconf-set-selections
-apt-get -y install libguestfs-tools sysfsutils
+echo "libguestfs-tools        libguestfs/update-appliance     boolean true"  | debconf-set-selections
+apt-get -y install libguestfs-tools sysfsutils guestfsd python-guestfs
 
 ######## Backup configurations for NOVA ##########"
 sleep 7

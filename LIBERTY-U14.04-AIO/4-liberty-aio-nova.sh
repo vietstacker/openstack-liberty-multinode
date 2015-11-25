@@ -29,8 +29,12 @@ echo "########## Install NOVA in $LOCAL_IP ##########"
 sleep 5 
 apt-get -y install  nova-compute nova-api nova-cert nova-conductor nova-consoleauth nova-novncproxy nova-scheduler python-novaclient
 echo "libguestfs-tools        libguestfs/update-appliance     boolean true"  | debconf-set-selections
-apt-get -y install libguestfs-tools sysfsutils
+apt-get -y install libguestfs-tools sysfsutils guestfsd python-guestfs
 
+#fix loi chen pass tren hypervisor la KVM
+update-guestfs-appliance
+chmod 0644 /boot/vmlinuz*
+usermod -a -G kvm root
 
 ######## Backup configurations for NOVA ##########"
 sleep 7
