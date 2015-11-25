@@ -71,6 +71,7 @@ firewall_driver = nova.virt.firewall.NoopFirewallDriver
 enabled_apis=osapi_compute,metadata
 verbose = True
 
+enable_instance_password = True
 
 [database]
 connection = mysql+pymysql://nova:$NOVA_DBPASS@$LOCAL_IP/nova
@@ -117,6 +118,11 @@ metadata_proxy_shared_secret = $DEFAULT_PASS
 
 [cinder]
 os_region_name = RegionOne
+
+[libvirt]
+inject_key = True
+inject_partition = -1
+inject_password = True
 
 EOF
 

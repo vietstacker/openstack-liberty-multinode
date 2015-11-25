@@ -113,10 +113,6 @@ password = $NEUTRON_PASS
 service_metadata_proxy = True
 metadata_proxy_shared_secret = $METADATA_SECRET
 
-[libvirt]
-inject_key = True
-inject_partition = -1
-inject_password = True
 EOF
 
 echo "########## Remove Nova default db ##########"
