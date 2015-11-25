@@ -34,7 +34,7 @@ cat << EOF >> $filehtml
 </html>
 EOF
 # Allowing insert password in dashboard ( only apply in image )
-# sed -i "s/'can_set_password': False/'can_set_password': True/g" /etc/openstack-dashboard/local_settings.py
+sed -i "s/'can_set_password': False/'can_set_password': True/g" /etc/openstack-dashboard/local_settings.py
 
 ## /* Restarting apache2 and memcached
 service apache2 restart
