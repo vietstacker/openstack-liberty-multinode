@@ -41,6 +41,7 @@ sed -i "s/server ntp.ubuntu.com/server $CON_MGNT_IP iburst/g" /etc/ntp.conf
 
 sleep 5
 echo "##### Installl package for NOVA"
+apt-get -y install nova-compute 
 echo "libguestfs-tools        libguestfs/update-appliance     boolean true"  | debconf-set-selections
 apt-get -y install libguestfs-tools sysfsutils guestfsd python-guestfs
 
