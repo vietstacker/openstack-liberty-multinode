@@ -30,9 +30,9 @@ apt-get update
 apt-get -y install git 
 
 git clone https://github.com/vietstacker/openstack-liberty-multinode.git
-mv /root/openstack-liberty-multinode/LLIBERTY-U14.04-LB/ /root/
+mv /root/openstack-liberty-multinode/LIBERTY-U14.04-LB/ /root/
 rm -rf openstack-liberty-multinode/
-cd LLIBERTY-U14.04-LB/
+cd LIBERTY-U14.04-LB/
 chmod +x *.sh
 
 ```
@@ -93,9 +93,9 @@ apt-get update
 apt-get -y install git 
 
 git clone https://github.com/vietstacker/openstack-liberty-multinode.git
-mv /root/openstack-liberty-multinode/LLIBERTY-U14.04-LB/ /root/
+mv /root/openstack-liberty-multinode/LIBERTY-U14.04-LB/ /root/
 rm -rf openstack-liberty-multinode/
-cd LLIBERTY-U14.04-LB/
+cd LIBERTY-U14.04-LB/
 chmod +x *.sh
 
 ### Establish IP and hostname
@@ -109,7 +109,7 @@ bash com1-ipdd.sh
 
 ```sh
 su -
-cd LLIBERTY-U14.04-LB/
+cd LIBERTY-U14.04-LB/
 bash com1-prepare.sh
 ```
 
