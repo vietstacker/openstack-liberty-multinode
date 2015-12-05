@@ -77,7 +77,7 @@ connection = mysql+pymysql://nova:$NOVA_DBPASS@$CON_MGNT_IP/nova
 [oslo_messaging_rabbit]
 rabbit_host = $CON_MGNT_IP
 rabbit_userid = openstack
-rabbit_password = Welcome123
+rabbit_password = $RABBIT_PASS
 
 [keystone_authtoken]
 auth_uri = http://$CON_MGNT_IP:5000
