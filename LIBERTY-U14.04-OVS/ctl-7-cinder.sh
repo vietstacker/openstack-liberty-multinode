@@ -39,7 +39,7 @@ volumev2
 #
 echo "########## Install CINDER ##########"
 sleep 3
-apt-get install cinder-api cinder-scheduler python-cinderclient lvm2 install cinder-volume python-mysqldb
+apt-get install -y cinder-api cinder-scheduler python-cinderclient lvm2 install cinder-volume python-mysqldb
 
 pvcreate /dev/vdb
 vgcreate cinder-volumes /dev/vdb
@@ -116,4 +116,4 @@ service cinder-scheduler restart
 
 rm -f /var/lib/cinder/cinder.sqlite
 
-echo "########## Finish setting up CINDER !!! ##########
+echo "########## Finish setting up CINDER !!! ##########"
