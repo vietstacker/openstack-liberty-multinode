@@ -39,7 +39,8 @@ volumev2
 #
 echo "########## Install CINDER ##########"
 sleep 3
-apt-get install -y cinder-api cinder-scheduler python-cinderclient lvm2 install cinder-volume python-mysqldb
+apt-get install -y cinder-api cinder-scheduler python-cinderclient lvm2 install cinder-volume python-mysqldb  qemu 
+
 
 pvcreate /dev/vdb
 vgcreate cinder-volumes /dev/vdb
