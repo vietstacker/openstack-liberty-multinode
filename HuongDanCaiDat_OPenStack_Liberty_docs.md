@@ -704,6 +704,10 @@ rm -f /var/lib/nova/nova.sqlite
 ```
 
 #### Cài đặt trên NOVA trên COMPUTE NODE
+- Khai báo các gói để cài đặt OpenStack Liberty
+
+apt-get -y install software-properties-common
+add-apt-repository -y cloud-archive:liberty 
 
 - Thiết lập IP
 ```sh
