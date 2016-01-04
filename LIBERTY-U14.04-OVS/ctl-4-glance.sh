@@ -42,6 +42,8 @@ cat << EOF > $fileglanceapicontrol
 [DEFAULT]
 notification_driver = noop
 verbose = True
+notification_driver = messagingv2
+rpc_backend = rabbit
 
 [database]
 connection = mysql+pymysql://glance:$GLANCE_DBPASS@$CON_MGNT_IP/glance
@@ -68,7 +70,12 @@ password = $GLANCE_PASS
 [oslo_concurrency]
 [oslo_messaging_amqp]
 [oslo_messaging_qpid]
+
 [oslo_messaging_rabbit]
+rabbit_host = $CON_MGNT_IP
+rabbit_userid = openstack
+rabbit_password = $RABBIT_PASS
+
 [oslo_policy]
 [paste_deploy]
 flavor = keystone
@@ -94,7 +101,8 @@ cat << EOF > $fileglanceregcontrol
 [DEFAULT]
 notification_driver = noop
 verbose = True
-
+notification_driver = messagingv2
+rpc_backend = rabbit
 
 [database]
 connection = mysql+pymysql://glance:$GLANCE_DBPASS@$CON_MGNT_IP/glance
@@ -117,7 +125,11 @@ password = $GLANCE_PASS
 [matchmaker_ring]
 [oslo_messaging_amqp]
 [oslo_messaging_qpid]
+
 [oslo_messaging_rabbit]
+rabbit_host = $CON_MGNT_IP
+rabbit_userid = openstack
+rabbit_password = $RABBIT_PASS
 [oslo_policy]
 
 [paste_deploy]

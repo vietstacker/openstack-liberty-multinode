@@ -70,6 +70,8 @@ enabled_backends = lvm
 
 glance_host = $CON_MGNT_IP
 
+notification_driver = messagingv2
+
 [database]
 connection = mysql+pymysql://cinder:$CINDER_DBPASS@$CON_MGNT_IP/cinder
 

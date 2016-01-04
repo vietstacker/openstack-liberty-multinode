@@ -21,11 +21,12 @@ openstack user create --password $CEILOMETER_PASS ceilometer
 openstack role add --project service --user ceilometer admin
 openstack service create --name ceilometer --description "Telemetry" metering
 
-
-openstack endpoint create --region RegionOne metering public http://$CON_MGNT_IP:8777
-openstack endpoint create --region RegionOne metering internal http://$CON_MGNT_IP:8777
-openstack endpoint create --region RegionOne metering admin http://$CON_MGNT_IP:8777
-
+openstack endpoint create \
+--publicurl http://$CON_MGNT_IP:8777 \
+--internalurl http://$CON_MGNT_IP:8777 \
+--adminurl http://$CON_MGNT_IP:8777 \
+--region RegionOne \
+ceilometer
 
 # Cai dat cac goi trong CEILOMETER
 
