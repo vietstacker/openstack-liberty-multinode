@@ -88,7 +88,7 @@ apt-get -y install git
 
 - Thực thi script để đặt địa chỉ IP tĩnh cho máy cài OpenStack
 ```sh
-git clone https://github.com/vietstacker/openstack-liberty-multinode.git
+git clone https://github.com/congto/openstack-liberty-multinode.git
 
 mv /root/openstack-liberty-multinode/LIBERTY-U14.04-AIO /root
 rm -rf openstack-liberty-multinode
@@ -112,7 +112,7 @@ bash AIO-LIBERTY-2.sh
 - Sử dụng quyền root để đăng nhập, với Ubuntu 14.04 cần đăng nhập bằng user thường trước, sau đó chuyển qua root bằng lệnh su -
 
 ```sh
-git clone https://github.com/vietstacker/openstack-liberty-multinode.git
+git clone https://github.com/congto/openstack-liberty-multinode.git
 
 mv /root/openstack-liberty-multinode/LIBERTY-U14.04-AIO /root
 rm -rf openstack-liberty-multinode
