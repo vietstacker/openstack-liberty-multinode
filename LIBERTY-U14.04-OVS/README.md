@@ -84,6 +84,12 @@ bash ctl-6-neutron.sh
 bash ctl-horizon.sh
 ```
 
+### Cài đặt Ceilomter
+```sh
+bash ctl-10-ceilometer.sh
+```
+
+
 ## Cài đặt trên COMPUTE NODE
 ### Tải GIT và script
 - Cài đặt gói git và tải script 
