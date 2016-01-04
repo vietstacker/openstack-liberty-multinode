@@ -26,7 +26,7 @@ openstack endpoint create \
 --internalurl http://$CON_MGNT_IP:8777 \
 --adminurl http://$CON_MGNT_IP:8777 \
 --region RegionOne \
-ceilometer
+metering
 
 # Cai dat cac goi trong CEILOMETER
 
