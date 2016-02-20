@@ -11,7 +11,15 @@
 - Các thao tác được thực hiện với tài khoản root.
 - Chạy các lệnh dưới ngay sau khi cài đặt xong máy ảo.
 - Mô hình phải đảm bảo cấu hình đúng dải IP ở trên.
-
+- Phiên bản hệ điều hành cho các máy là Ubuntu Server 14.04-x 64 bit
+```sh
+root@controller:~# lsb_release -a
+No LSB modules are available.
+Distributor ID: Ubuntu
+Description:    Ubuntu 14.04.3 LTS
+Release:        14.04
+Codename:       trusty
+```
 
 
 #### Node Controller
