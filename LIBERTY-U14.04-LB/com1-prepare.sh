@@ -13,7 +13,7 @@ apt-get install ntp -y
 apt-get install python-mysqldb -y
 #
 echo "##### Backup NTP configuration... ##### "
-sleep 7 
+sleep 7
 cp /etc/ntp.conf /etc/ntp.conf.bka
 rm /etc/ntp.conf
 cat /etc/ntp.conf.bka | grep -v ^# | grep -v ^$ >> /etc/ntp.conf
@@ -34,8 +34,9 @@ sed -i "s/server ntp.ubuntu.com/server $CON_MGNT_IP iburst/g" /etc/ntp.conf
 
 sleep 5
 echo "##### Installl package for NOVA"
-apt-get -y install nova-compute 
-echo "libguestfs-tools        libguestfs/update-appliance     boolean true"  | debconf-set-selections
+apt-get -y install nova-compute
+echo "libguestfs-tools libguestfs/update-appliance boolean true" \
+    | debconf-set-selections
 
 apt-get -y install libguestfs-tools sysfsutils guestfsd python-guestfs
 
@@ -51,7 +52,7 @@ sleep 5
 filenova=/etc/nova/nova.conf
 test -f $filenova.orig || cp $filenova $filenova.orig
 
-#Chen noi dung file /etc/nova/nova.conf vao 
+#Chen noi dung file /etc/nova/nova.conf vao
 cat << EOF > $filenova
 [DEFAULT]
 dhcpbridge_flagfile=/etc/nova/nova.conf
@@ -184,9 +185,9 @@ rabbit_password = $RABBIT_PASS
 EOF
 
 echo "############ Configuring Linux Bbridge AGENT ############"
-sleep 7 
+sleep 7
 
-linuxbridgefile=/etc/neutron/plugins/ml2/linuxbridge_agent.ini 
+linuxbridgefile=/etc/neutron/plugins/ml2/linuxbridge_agent.ini
 
 test -f $linuxbridgefile.orig || cp $linuxbridgefile $linuxbridgefile.orig
 

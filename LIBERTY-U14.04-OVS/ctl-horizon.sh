@@ -8,14 +8,14 @@ echo "########## START INSTALLING OPS DASHBOARD ##########"
 sleep 5
 
 echo "########## Installing Dashboard package ##########"
-apt-get -y install openstack-dashboard 
+apt-get -y install openstack-dashboard
 apt-get -y remove --auto-remove openstack-dashboard-ubuntu-theme
 
 # echo "########## Fix bug in apache2 ##########"
 # sleep 5
 # Fix bug apache in ubuntu 14.04
 # echo "ServerName localhost" > /etc/apache2/conf-available/servername.conf
-# sudo a2enconf servername 
+# sudo a2enconf servername
 
 echo "########## Creating redirect page ##########"
 
@@ -34,7 +34,8 @@ cat << EOF >> $filehtml
 </html>
 EOF
 # Allowing insert password in dashboard ( only apply in image )
-sed -i "s/'can_set_password': False/'can_set_password': True/g" /etc/openstack-dashboard/local_settings.py
+sed -i "s/'can_set_password': False/'can_set_password': True/g" \
+    /etc/openstack-dashboard/local_settings.py
 
 ## /* Restarting apache2 and memcached
 service apache2 restart

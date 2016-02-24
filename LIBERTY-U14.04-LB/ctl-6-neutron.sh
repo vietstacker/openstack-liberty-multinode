@@ -14,29 +14,30 @@ FLUSH PRIVILEGES;
 EOF
 
 
-echo "Create  user, endpoint for NEUTRON"
+echo "Create user, endpoint for NEUTRON"
 openstack user create --password $ADMIN_PASS neutron
 openstack role add --project service --user neutron admin
-openstack service create --name neutron --description "OpenStack Networking" network
- 
+openstack service create --name neutron --description \
+    "OpenStack Networking" network
+
 openstack endpoint create \
-  --publicurl http://$CON_MGNT_IP:9696 \
-  --adminurl http://$CON_MGNT_IP:9696 \
-  --internalurl http://$CON_MGNT_IP:9696 \
-  --region RegionOne \
-  network 
-  
+    --publicurl http://$CON_MGNT_IP:9696 \
+    --adminurl http://$CON_MGNT_IP:9696 \
+    --internalurl http://$CON_MGNT_IP:9696 \
+    --region RegionOne \
+    network
+
 # SERVICE_TENANT_ID=`keystone tenant-get service | awk '$2~/^id/{print $4}'`
 
 
-echo "########## Install NEUTRON in $CON_MGNT_IP or NETWORK node ################"
+echo "########## Install NEUTRON in $CON_MGNT_IP or NETWORK node ############"
 sleep 5
 apt-get -y install neutron-server neutron-plugin-ml2 \
 neutron-plugin-linuxbridge-agent neutron-l3-agent neutron-dhcp-agent \
 neutron-metadata-agent python-neutronclient
 
 
-######## Backup configuration NEUTRON.CONF in $CON_MGNT_IP##################"
+######## Backup configuration NEUTRON.CONF in $CON_MGNT_IP################"
 echo "########## Config NEUTRON in $CON_MGNT_IP/NETWORK node ##########"
 sleep 7
 
@@ -141,9 +142,9 @@ enable_ipset = True
 EOF
 
 echo "############ Configuring Linux Bbridge AGENT ############"
-sleep 7 
+sleep 7
 
-linuxbridgefile=/etc/neutron/plugins/ml2/linuxbridge_agent.ini 
+linuxbridgefile=/etc/neutron/plugins/ml2/linuxbridge_agent.ini
 
 test -f $linuxbridgefile.orig || cp $linuxbridgefile $linuxbridgefile.orig
 
@@ -169,7 +170,7 @@ EOF
 
 
 echo "############ Configuring L3 AGENT ############"
-sleep 7 
+sleep 7
 netl3agent=/etc/neutron/l3_agent.ini
 
 test -f $netl3agent.orig || cp $netl3agent $netl3agent.orig
@@ -188,8 +189,8 @@ verbose = True
 EOF
 
 
-echo "############  Configuring DHCP AGENT ############ "
-sleep 7 
+echo "############ Configuring DHCP AGENT ############ "
+sleep 7
 #
 netdhcp=/etc/neutron/dhcp_agent.ini
 
@@ -216,8 +217,8 @@ echo "dhcp-option-force=26,1450" > /etc/neutron/dnsmasq-neutron.conf
 killall dnsmasq
 
 
-echo "############  Configuring METADATA AGENT ############"
-sleep 7 
+echo "############ Configuring METADATA AGENT ############"
+sleep 7
 netmetadata=/etc/neutron/metadata_agent.ini
 
 test -f $netmetadata.orig || cp $netmetadata $netmetadata.orig
@@ -247,16 +248,16 @@ EOF
 
 
 su -s /bin/sh -c "neutron-db-manage --config-file /etc/neutron/neutron.conf \
-  --config-file /etc/neutron/plugins/ml2/ml2_conf.ini upgrade head" neutron
-  
+    --config-file /etc/neutron/plugins/ml2/ml2_conf.ini upgrade head" neutron
+
 echo "########## Restarting NOVA service ##########"
-sleep 7 
+sleep 7
 service nova-api restart
 service nova-scheduler restart
 service nova-conductor restart
 
 echo "########## Restarting NEUTRON service ##########"
-sleep 7 
+sleep 7
 service neutron-server restart
 service neutron-plugin-linuxbridge-agent restart
 service neutron-dhcp-agent restart
@@ -272,7 +273,7 @@ sleep 5
 cat << EOF > /etc/network/interfaces
 #Assign IP for Controller node
 
-# LOOPBACK NET 
+# LOOPBACK NET
 auto lo
 iface lo inet loopback
 
@@ -293,7 +294,7 @@ dns-nameservers 8.8.8.8
 
 
 auto eth1
-iface  eth1 inet manual
+iface eth1 inet manual
 up ip link set dev \$IFACE up
 down ip link set dev \$IFACE down
 

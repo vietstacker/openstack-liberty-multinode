@@ -1,16 +1,16 @@
-#!/bin/bash -ex 
+#!/bin/bash -ex
 
 source config.cfg
 
-#**********************************************************************************#
-#################### Python clientNTP, MARIADB, RabbitMQ ########################### 
-#**********************************************************************************#
+#************************************************************************#
+########## Python clientNTP, MARIADB, RabbitMQ ###########################
+#************************************************************************#
 echo "Install python client"
 apt-get -y install python-openstackclient
 sleep 5
 
 echo "Install and config NTP"
-sleep 3 
+sleep 3
 apt-get install ntp -y
 cp /etc/ntp.conf /etc/ntp.conf.bka
 rm /etc/ntp.conf
@@ -49,9 +49,11 @@ echo "Finish setup pre-install package !!!"
 echo "##### Install MYSQL #####"
 sleep 3
 
-echo mysql-server mysql-server/root_password password $MYSQL_PASS | debconf-set-selections
-echo mysql-server mysql-server/root_password_again password $MYSQL_PASS | debconf-set-selections
-apt-get -y install mariadb-server python-mysqldb curl 
+echo mysql-server mysql-server/root_password password $MYSQL_PASS \
+    | debconf-set-selections
+echo mysql-server mysql-server/root_password_again password $MYSQL_PASS \
+    | debconf-set-selections
+apt-get -y install mariadb-server python-mysqldb curl
 
 echo "##### Configuring MYSQL #####"
 sleep 3
@@ -79,7 +81,7 @@ echo "Restart MYSQL"
 service mysql restart
 
 #********************************************************#
-####################  KEYSTONE ########################### 
+#################### KEYSTONE ############################
 #********************************************************#
 
 echo "Create Database for Keystone"
@@ -94,13 +96,14 @@ EOF
 echo "##### Install keystone #####"
 sleep 3
 echo "manual" > /etc/init/keystone.override
- 
-apt-get -y install keystone python-openstackclient apache2 libapache2-mod-wsgi memcached python-memcache
- 
+
+apt-get -y install keystone python-openstackclient apache2 \
+    libapache2-mod-wsgi memcached python-memcache
+
 #/* Back-up file nova.conf
 filekeystone=/etc/keystone/keystone.conf
 test -f $filekeystone.orig || cp $filekeystone $filekeystone.orig
- 
+
 #Config file /etc/keystone/keystone.conf
 cat << EOF > $filekeystone
 
@@ -164,13 +167,12 @@ driver = memcache
 Distribution = Ubuntu
 
 EOF
- 
+
 #
 su -s /bin/sh -c "keystone-manage db_sync" keystone
- 
-echo "#### ServerName $LOCAL_IP#### " >>  /etc/apache2/apache2.conf
 
- 
+echo "#### ServerName $LOCAL_IP#### " >> /etc/apache2/apache2.conf
+
 cat << EOF > /etc/apache2/sites-available/wsgi-keystone.conf
 Listen 5000
 Listen 35357
@@ -221,11 +223,12 @@ Listen 35357
     </Directory>
 </VirtualHost>
 
- 
+
 EOF
- 
-ln -s /etc/apache2/sites-available/wsgi-keystone.conf /etc/apache2/sites-enabled
- 
+
+ln -s /etc/apache2/sites-available/wsgi-keystone.conf \
+    /etc/apache2/sites-enabled
+
 service apache2 restart
 
 rm -f /var/lib/keystone/keystone.db
@@ -233,14 +236,14 @@ rm -f /var/lib/keystone/keystone.db
 
 export OS_TOKEN="$TOKEN_PASS"
 export OS_URL=http://$LOCAL_IP:35357/v2.0
- 
- 
+
 # export OS_SERVICE_TOKEN="$TOKEN_PASS"
 # export OS_SERVICE_ENDPOINT="http://$LOCAL_IP:35357/v2.0"
 # export SERVICE_ENDPOINT="http://$LOCAL_IP:35357/v2.0"
- 
-###  Identity service
-openstack service create --name keystone --description "OpenStack Identity" identity
+
+### Identity service
+openstack service create --name keystone --description \
+    "OpenStack Identity" identity
 ### Create the Identity service API endpoint
 openstack endpoint create \
 --publicurl http://$LOCAL_IP:5000/v2.0 \
@@ -248,45 +251,44 @@ openstack endpoint create \
 --adminurl http://$LOCAL_IP:35357/v2.0 \
 --region RegionOne \
 identity
- 
+
 #### To create tenants, users, and roles ADMIN
 openstack project create --description "Admin Project" admin
-openstack user create --password  $ADMIN_PASS admin
+openstack user create --password $ADMIN_PASS admin
 openstack role create admin
 openstack role add --project admin --user admin admin
- 
-#### To create tenants, users, and roles  SERVICE
+
+#### To create tenants, users, and roles SERVICE
 openstack project create --description "Service Project" service
- 
- 
-#### To create tenants, users, and roles  DEMO
+
+#### To create tenants, users, and roles DEMO
 openstack project create --description "Demo Project" demo
 openstack user create --password $ADMIN_PASS demo
- 
+
 ### Create the user role
 openstack role create user
 openstack role add --project demo --user demo user
- 
+
 #################
- 
+
 unset OS_TOKEN OS_URL
- 
+
 # Tao bien moi truong
- 
+
 echo "export OS_PROJECT_DOMAIN_ID=default" > admin-openrc.sh
 echo "export OS_USER_DOMAIN_ID=default" >> admin-openrc.sh
 echo "export OS_PROJECT_NAME=admin" >> admin-openrc.sh
 echo "export OS_TENANT_NAME=admin" >> admin-openrc.sh
 echo "export OS_USERNAME=admin" >> admin-openrc.sh
-echo "export OS_PASSWORD=$ADMIN_PASS"  >> admin-openrc.sh
+echo "export OS_PASSWORD=$ADMIN_PASS" >> admin-openrc.sh
 echo "export OS_AUTH_URL=http://$LOCAL_IP:35357/v3" >> admin-openrc.sh
-echo "export OS_VOLUME_API_VERSION=2"   >> admin-openrc.sh
+echo "export OS_VOLUME_API_VERSION=2"  >> admin-openrc.sh
 
 sleep 5
 echo "########## Execute environment script ##########"
 chmod +x admin-openrc.sh
-cat  admin-openrc.sh >> /etc/profile
-cp  admin-openrc.sh /root/admin-openrc.sh
+cat admin-openrc.sh >> /etc/profile
+cp admin-openrc.sh /root/admin-openrc.sh
 source admin-openrc.sh
 
 echo "export OS_PROJECT_DOMAIN_ID=default" > demo-openrc.sh
@@ -294,15 +296,15 @@ echo "export OS_USER_DOMAIN_ID=default" >> demo-openrc.sh
 echo "export OS_PROJECT_NAME=demo" >> demo-openrc.sh
 echo "export OS_TENANT_NAME=demo" >> demo-openrc.sh
 echo "export OS_USERNAME=demo" >> demo-openrc.sh
-echo "export OS_PASSWORD=$ADMIN_PASS"  >> demo-openrc.sh
+echo "export OS_PASSWORD=$ADMIN_PASS" >> demo-openrc.sh
 echo "export OS_AUTH_URL=http://$LOCAL_IP:35357/v3" >> demo-openrc.sh
-echo "export OS_VOLUME_API_VERSION=2"  >> demo-openrc.sh
+echo "export OS_VOLUME_API_VERSION=2" >> demo-openrc.sh
 chmod +x demo-openrc.sh
-cp  demo-openrc.sh /root/demo-openrc.sh
+cp demo-openrc.sh /root/demo-openrc.sh
 
 
 #*****************************************************#
-#################### GLANCE ########################### 
+#################### GLANCE ###########################
 #*****************************************************#
 
 echo "Create the database for GLANCE"
@@ -319,7 +321,8 @@ echo " Create user, endpoint for GLANCE"
 
 openstack user create --password $ADMIN_PASS glance
 openstack role add --project service --user glance admin
-openstack service create --name glance --description "OpenStack Image service" image
+openstack service create --name glance --description \
+    "OpenStack Image service" image
 
 openstack endpoint create \
 --publicurl http://$LOCAL_IP:9292 \
@@ -332,10 +335,11 @@ echo "########## Install GLANCE ##########"
 apt-get -y install glance python-glanceclient
 sleep 10
 echo "########## Configuring GLANCE API ##########"
-sleep 5 
+sleep 5
 #/* Back-up file nova.conf
 fileglanceapicontrol=/etc/glance/glance-api.conf
-test -f $fileglanceapicontrol.orig || cp $fileglanceapicontrol $fileglanceapicontrol.orig
+test -f $fileglanceapicontrol.orig \
+    || cp $fileglanceapicontrol $fileglanceapicontrol.orig
 rm $fileglanceapicontrol
 touch $fileglanceapicontrol
 
@@ -386,7 +390,8 @@ sleep 10
 echo "########## Configuring GLANCE REGISTER ##########"
 #/* Backup file file glance-registry.conf
 fileglanceregcontrol=/etc/glance/glance-registry.conf
-test -f $fileglanceregcontrol.orig || cp $fileglanceregcontrol $fileglanceregcontrol.orig
+test -f $fileglanceregcontrol.orig \
+    || cp $fileglanceregcontrol $fileglanceregcontrol.orig
 rm $fileglanceregcontrol
 touch $fileglanceregcontrol
 #Config file /etc/glance/glance-registry.conf
@@ -466,7 +471,7 @@ echo "########## Testing Glance ##########"
 glance image-list
 
 #*****************************************************#
-##################### NOVA ############################ 
+##################### NOVA ############################
 #*****************************************************#
 
 echo "Create DB for NOVA "
@@ -491,9 +496,11 @@ openstack endpoint create \
 compute
 
 echo "########## Install NOVA in $LOCAL_IP ##########"
-sleep 5 
-apt-get -y install  nova-compute nova-api nova-cert nova-conductor nova-consoleauth nova-novncproxy nova-scheduler python-novaclient
-echo "libguestfs-tools        libguestfs/update-appliance     boolean true"  | debconf-set-selections
+sleep 5
+apt-get -y install nova-compute nova-api nova-cert nova-conductor \
+    nova-consoleauth nova-novncproxy nova-scheduler python-novaclient
+echo "libguestfs-tools libguestfs/update-appliance boolean true" \
+    | debconf-set-selections
 apt-get -y install libguestfs-tools sysfsutils
 
 
@@ -586,7 +593,7 @@ sleep 7
 rm /var/lib/nova/nova.sqlite
 
 echo "########## Syncing Nova DB ##########"
-sleep 7 
+sleep 7
 su -s /bin/sh -c "nova-manage db sync" nova
 
 
@@ -594,19 +601,33 @@ su -s /bin/sh -c "nova-manage db sync" nova
 # echo 'kvm_intel' >> /etc/modules
 
 echo "########## Restarting NOVA ... ##########"
-sleep 7 
-service nova-api restart; service nova-cert restart; service nova-consoleauth restart; service nova-scheduler restart; service nova-conductor restart; service nova-novncproxy restart; service nova-compute restart; service nova-console restart
+sleep 7
+service nova-api restart;
+service nova-cert restart;
+service nova-consoleauth restart;
+service nova-scheduler restart;
+service nova-conductor restart;
+service nova-novncproxy restart;
+service nova-compute restart;
+service nova-console restart
 
-sleep 7 
+sleep 7
 echo "########## Restarting NOVA ... ##########"
-service nova-api restart; service nova-cert restart; service nova-consoleauth restart; service nova-scheduler restart; service nova-conductor restart; service nova-novncproxy restart; service nova-compute restart; service nova-console restart
+service nova-api restart;
+service nova-cert restart;
+service nova-consoleauth restart;
+service nova-scheduler restart;
+service nova-conductor restart;
+service nova-novncproxy restart;
+service nova-compute restart;
+service nova-console restart
 
 echo "########## Testing NOVA service ##########"
 nova-manage service list
 
 
 #**********************************************************#
-####################### NEUTRON ############################ 
+####################### NEUTRON ############################
 #**********************************************************#
 
 echo "Create DB for NEUTRON "
@@ -618,25 +639,28 @@ FLUSH PRIVILEGES;
 EOF
 
 
-echo "Create  user, endpoint for NEUTRON"
+echo "Create user, endpoint for NEUTRON"
 openstack user create --password $ADMIN_PASS neutron
 openstack role add --project service --user neutron admin
-openstack service create --name neutron --description "OpenStack Networking" network
- 
+openstack service create --name neutron --description \
+    "OpenStack Networking" network
+
 openstack endpoint create \
-  --publicurl http://$LOCAL_IP:9696 \
-  --adminurl http://$LOCAL_IP:9696 \
-  --internalurl http://$LOCAL_IP:9696 \
-  --region RegionOne \
-  network 
+    --publicurl http://$LOCAL_IP:9696 \
+    --adminurl http://$LOCAL_IP:9696 \
+    --internalurl http://$LOCAL_IP:9696 \
+    --region RegionOne \
+    network
 
 echo "########## CAI DAT NEUTRON ##########"
 
-apt-get -y install neutron-server python-neutronclient neutron-plugin-ml2 neutron-plugin-openvswitch-agent \
-neutron-l3-agent neutron-dhcp-agent neutron-metadata-agent neutron-plugin-openvswitch neutron-common
+apt-get -y install neutron-server python-neutronclient \
+    neutron-plugin-ml2 neutron-plugin-openvswitch-agent \
+    neutron-l3-agent neutron-dhcp-agent neutron-metadata-agent \
+    neutron-plugin-openvswitch neutron-common
 
 ######## SAO LUU CAU HINH NEUTRON.CONF CHO CONTROLLER##################"
-echo "########## Sua lai file neutron.conf ##########"
+echo "########## Editing file neutron.conf ##########"
 
 controlneutron=/etc/neutron/neutron.conf
 test -f $controlneutron.orig || cp $controlneutron $controlneutron.orig
@@ -730,7 +754,7 @@ firewall_driver = neutron.agent.linux.iptables_firewall.OVSHybridIptablesFirewal
 local_ip = $LOCAL_IP
 enable_tunneling = True
 bridge_mappings = external:br-ex
- 
+
 [agent]
 tunnel_types = gre
 EOF
@@ -766,11 +790,11 @@ metadata_proxy_shared_secret = $METADATA_SECRET
 
 EOF
 
-######## SUA FILE CAU HINH  DHCP ##################"
+######## SUA FILE CAU HINH DHCP ##################"
 echo "########## Sua file cau hinh DHCP ##########"
 sleep 7
 
-dhcpfile=/etc/neutron/dhcp_agent.ini 
+dhcpfile=/etc/neutron/dhcp_agent.ini
 test -f $dhcpfile.orig || cp $dhcpfile $dhcpfile.orig
 rm $dhcpfile
 cat << EOF > $dhcpfile
@@ -806,11 +830,11 @@ chown root:neutron /etc/neutron/*
 chown root:neutron $controlML2
 
 su -s /bin/sh -c "neutron-db-manage --config-file /etc/neutron/neutron.conf \
-  --config-file /etc/neutron/plugins/ml2/ml2_conf.ini upgrade head" neutron  
+    --config-file /etc/neutron/plugins/ml2/ml2_conf.ini upgrade head" neutron
 
-echo "########## KHOI DONG LAI NEUTRON        ##########"
+echo "########## KHOI DONG LAI NEUTRON ##########"
 sleep 5
-# for i in $( ls /etc/init.d/neutron-* ); do service `basename $i` restart; done
+#for i in $( ls /etc/init.d/neutron-* ); do service `basename $i` restart;done
 service neutron-server restart
 service neutron-l3-agent restart
 service neutron-dhcp-agent restart
@@ -821,7 +845,7 @@ service neutron-plugin-openvswitch-agent restart
 
 echo "########## KHOI DONG LAI NEUTRON (lan2) ##########"
 sleep 5
-# for i in $( ls /etc/init.d/neutron-* ); do service `basename $i` restart; done
+#for i in $( ls /etc/init.d/neutron-* ); do service `basename $i` restart;done
 service neutron-server restart
 service neutron-l3-agent restart
 service neutron-dhcp-agent restart
@@ -829,7 +853,7 @@ service neutron-metadata-agent restart
 service openvswitch-switch restart
 service neutron-plugin-openvswitch-agent restart
 
-# Them lenh khoi dong dich vu cua NEUTRON moi khi reboot OpenStack de fix loi.
+#Them lenh khoi dong dich vu cua NEUTRON moi khi reboot OpenStack de fix loi.
 sed -i "s/exit 0/# exit 0/g" /etc/rc.local
 echo "service neutron-server restart" >> /etc/rc.local
 echo "service neutron-l3-agent restart" >> /etc/rc.local
@@ -840,23 +864,23 @@ echo "service neutron-plugin-openvswitch-agent restart" >> /etc/rc.local
 echo "exit 0" >> /etc/rc.local
 
 
-echo "########## KIEM TRA NEUTRON (cho 30s)   ##########"
+echo "########## KIEM TRA NEUTRON (cho 30s) ##########"
 # Can doi neutron khoi dong xong de kiem tra
 sleep 30
 neutron agent-list
 
 #**********************************************************#
-####################### HORIZON ############################ 
+####################### HORIZON ############################
 #**********************************************************#
 echo "########## Installing Dashboard package ##########"
 sleep 5
-apt-get -y install openstack-dashboard 
+apt-get -y install openstack-dashboard
 
 # echo "########## Fix bug in apache2 ##########"
 # sleep 5
 # Fix bug apache in ubuntu 14.04
 # echo "ServerName localhost" > /etc/apache2/conf-available/servername.conf
-# sudo a2enconf servername 
+# sudo a2enconf servername
 
 echo "########## Creating redirect page ##########"
 
@@ -875,7 +899,8 @@ cat << EOF >> $filehtml
 </html>
 EOF
 # Allowing insert password in dashboard ( only apply in image )
-sed -i "s/'can_set_password': False/'can_set_password': True/g" /etc/openstack-dashboard/local_settings.py
+sed -i "s/'can_set_password': False/'can_set_password': True/g" \
+    /etc/openstack-dashboard/local_settings.py
 
 ## /* Restarting apache2 and memcached
 service apache2 restart

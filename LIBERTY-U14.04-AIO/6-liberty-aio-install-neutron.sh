@@ -11,26 +11,28 @@ FLUSH PRIVILEGES;
 EOF
 
 
-echo "Create  user, endpoint for NEUTRON"
+echo "Create user, endpoint for NEUTRON"
 openstack user create --password $ADMIN_PASS neutron
 openstack role add --project service --user neutron admin
-openstack service create --name neutron --description "OpenStack Networking" network
- 
+openstack service create --name neutron --description \
+    "OpenStack Networking" network
+
 openstack endpoint create \
-  --publicurl http://$LOCAL_IP:9696 \
-  --adminurl http://$LOCAL_IP:9696 \
-  --internalurl http://$LOCAL_IP:9696 \
-  --region RegionOne \
-  network 
+    --publicurl http://$LOCAL_IP:9696 \
+    --adminurl http://$LOCAL_IP:9696 \
+    --internalurl http://$LOCAL_IP:9696 \
+    --region RegionOne \
+    network
 
-echo "########## CAI DAT NEUTRON TREN CONTROLLER ##########"
-apt-get install -y openvswitch-switch 
+echo "########## Install NEUTRON on CONTROLLER ##########"
+apt-get install -y openvswitch-switch
 
-apt-get -y install neutron-server python-neutronclient neutron-plugin-ml2 neutron-plugin-openvswitch-agent \
-neutron-l3-agent neutron-dhcp-agent neutron-metadata-agent neutron-plugin-openvswitch neutron-common
+apt-get -y install neutron-server python-neutronclient neutron-plugin-ml2 \
+    neutron-plugin-openvswitch-agent neutron-l3-agent neutron-dhcp-agent \
+    neutron-metadata-agent neutron-plugin-openvswitch neutron-common
 
 ######## SAO LUU CAU HINH NEUTRON.CONF CHO CONTROLLER##################"
-echo "########## Sua lai file neutron.conf ##########"
+echo "########## Editing neutron.conf ##########"
 
 controlneutron=/etc/neutron/neutron.conf
 test -f $controlneutron.orig || cp $controlneutron $controlneutron.orig
@@ -94,7 +96,7 @@ EOF
 
 
 ######## SAO LUU CAU HINH ML2 CHO CONTROLLER##################"
-echo "########## Sau file cau hinh cho ml2_conf.ini ##########"
+echo "########## Config ml2_conf.ini ##########"
 sleep 7
 
 controlML2=/etc/neutron/plugins/ml2/ml2_conf.ini
@@ -125,7 +127,7 @@ firewall_driver = neutron.agent.linux.iptables_firewall.OVSHybridIptablesFirewal
 local_ip = $LOCAL_IP
 enable_tunneling = True
 bridge_mappings = external:br-ex
- 
+
 [agent]
 
 tunnel_types = gre
@@ -164,11 +166,11 @@ metadata_proxy_shared_secret = $METADATA_SECRET
 
 EOF
 
-######## SUA FILE CAU HINH  DHCP ##################"
+######## SUA FILE CAU HINH DHCP ##################"
 echo "########## Sua file cau hinh DHCP ##########"
 sleep 7
 
-dhcpfile=/etc/neutron/dhcp_agent.ini 
+dhcpfile=/etc/neutron/dhcp_agent.ini
 test -f $dhcpfile.orig || cp $dhcpfile $dhcpfile.orig
 rm $dhcpfile
 cat << EOF > $dhcpfile
@@ -205,13 +207,11 @@ chown root:neutron /etc/neutron/*
 chown root:neutron $controlML2
 
 su -s /bin/sh -c "neutron-db-manage --config-file /etc/neutron/neutron.conf \
-  --config-file /etc/neutron/plugins/ml2/ml2_conf.ini upgrade head" neutron
-  
-  
+    --config-file /etc/neutron/plugins/ml2/ml2_conf.ini upgrade head" neutron
 
-echo "########## KHOI DONG LAI NEUTRON        ##########"
+echo "########## Restarting NEUTRON ##########"
 sleep 5
-# for i in $( ls /etc/init.d/neutron-* ); do service `basename $i` restart; done
+#for i in $( ls /etc/init.d/neutron-* );do service `basename $i` restart;done
 service neutron-server restart
 service neutron-l3-agent restart
 service neutron-dhcp-agent restart
@@ -220,9 +220,9 @@ service openvswitch-switch restart
 service neutron-plugin-openvswitch-agent restart
 
 
-echo "########## KHOI DONG LAI NEUTRON (lan2) ##########"
+echo "########## Restarting NEUTRON ##########"
 sleep 5
-# for i in $( ls /etc/init.d/neutron-* ); do service `basename $i` restart; done
+#for i in $( ls /etc/init.d/neutron-* );do service `basename $i` restart;done
 service neutron-server restart
 service neutron-l3-agent restart
 service neutron-dhcp-agent restart
@@ -241,7 +241,7 @@ echo "service neutron-plugin-openvswitch-agent restart" >> /etc/rc.local
 echo "exit 0" >> /etc/rc.local
 
 
-echo "########## KIEM TRA NEUTRON (cho 60s)   ##########"
+echo "########## Testing NEUTRON (wait 60s) ##########"
 # Can doi neutron khoi dong xong de kiem tra
 sleep 30
 neutron agent-list

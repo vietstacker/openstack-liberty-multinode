@@ -10,7 +10,7 @@ sleep 5
 echo "net.ipv4.ip_forward=1" >> /etc/sysctl.conf
 echo "net.ipv4.conf.all.rp_filter=0" >> /etc/sysctl.conf
 echo "net.ipv4.conf.default.rp_filter=0" >> /etc/sysctl.conf
-sysctl -p 
+sysctl -p
 
 echo "Create DB for NEUTRON "
 sleep 5
@@ -22,28 +22,29 @@ FLUSH PRIVILEGES;
 EOF
 
 
-echo "Create  user, endpoint for NEUTRON"
+echo "Create user, endpoint for NEUTRON"
 sleep 5
 openstack user create --password $ADMIN_PASS neutron
 openstack role add --project service --user neutron admin
-openstack service create --name neutron --description "OpenStack Networking" network
- 
+openstack service create --name neutron --description \
+    "OpenStack Networking" network
+
 openstack endpoint create \
-  --publicurl http://$CON_MGNT_IP:9696 \
-  --adminurl http://$CON_MGNT_IP:9696 \
-  --internalurl http://$CON_MGNT_IP:9696 \
-  --region RegionOne \
-  network 
-  
+    --publicurl http://$CON_MGNT_IP:9696 \
+    --adminurl http://$CON_MGNT_IP:9696 \
+    --internalurl http://$CON_MGNT_IP:9696 \
+    --region RegionOne \
+    network
+
 # SERVICE_TENANT_ID=`keystone tenant-get service | awk '$2~/^id/{print $4}'`
 
 
-echo "########## Install NEUTRON in 172.16.69.40 or NETWORK node ################"
+echo "########## Install NEUTRON in 172.16.69.40 or NETWORK node ###########"
 sleep 5
-apt-get -y install neutron-server python-neutronclient neutron-plugin-ml2 neutron-plugin-openvswitch-agent \
-neutron-l3-agent neutron-dhcp-agent neutron-metadata-agent neutron-plugin-openvswitch neutron-common
-
-
+apt-get -y install neutron-server python-neutronclient \
+    neutron-plugin-ml2 neutron-plugin-openvswitch-agent \
+    neutron-l3-agent neutron-dhcp-agent neutron-metadata-agent \
+    neutron-plugin-openvswitch neutron-common
 
 ######## Backup configuration NEUTRON.CONF ##################"
 echo "########## Config NEUTRON ##########"
@@ -156,7 +157,7 @@ tunnel_types = gre
 EOF
 
 echo "############ Configuring L3 AGENT ############"
-sleep 7 
+sleep 7
 netl3agent=/etc/neutron/l3_agent.ini
 
 test -f $netl3agent.orig || cp $netl3agent $netl3agent.orig
@@ -173,8 +174,8 @@ verbose = True
 [AGENT]
 EOF
 
-echo "############  Configuring DHCP AGENT ############ "
-sleep 7 
+echo "############ Configuring DHCP AGENT ############ "
+sleep 7
 #
 netdhcp=/etc/neutron/dhcp_agent.ini
 
@@ -199,8 +200,8 @@ echo "dhcp-option-force=26,1454" > /etc/neutron/dnsmasq-neutron.conf
 killall dnsmasq
 
 
-echo "############  Configuring METADATA AGENT ############"
-sleep 7 
+echo "############ Configuring METADATA AGENT ############"
+sleep 7
 netmetadata=/etc/neutron/metadata_agent.ini
 
 test -f $netmetadata.orig || cp $netmetadata $netmetadata.orig
@@ -227,16 +228,16 @@ EOF
 #
 
 su -s /bin/sh -c "neutron-db-manage --config-file /etc/neutron/neutron.conf \
-  --config-file /etc/neutron/plugins/ml2/ml2_conf.ini upgrade head" neutron
-  
+    --config-file /etc/neutron/plugins/ml2/ml2_conf.ini upgrade head" neutron
+
 echo "########## Restarting NOVA service ##########"
-sleep 7 
+sleep 7
 service nova-api restart
 service nova-scheduler restart
 service nova-conductor restart
 
 echo "########## Restarting NEUTRON service ##########"
-sleep 7 
+sleep 7
 service neutron-server restart
 service neutron-plugin-openvswitch-agent restart
 service neutron-dhcp-agent restart

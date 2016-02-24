@@ -16,7 +16,8 @@ echo " Create user, endpoint for GLANCE"
 
 openstack user create --password $ADMIN_PASS glance
 openstack role add --project service --user glance admin
-openstack service create --name glance --description "OpenStack Image service" image
+openstack service create --name glance --description \
+    "OpenStack Image service" image
 
 openstack endpoint create \
 --publicurl http://$CON_MGNT_IP:9292 \
@@ -29,10 +30,11 @@ echo "########## Install GLANCE ##########"
 apt-get -y install glance python-glanceclient
 sleep 10
 echo "########## Configuring GLANCE API ##########"
-sleep 5 
+sleep 5
 #/* Back-up file nova.conf
 fileglanceapicontrol=/etc/glance/glance-api.conf
-test -f $fileglanceapicontrol.orig || cp $fileglanceapicontrol $fileglanceapicontrol.orig
+test -f $fileglanceapicontrol.orig \
+    || cp $fileglanceapicontrol $fileglanceapicontrol.orig
 rm $fileglanceapicontrol
 touch $fileglanceapicontrol
 
@@ -84,7 +86,8 @@ sleep 10
 echo "########## Configuring GLANCE REGISTER ##########"
 #/* Backup file file glance-registry.conf
 fileglanceregcontrol=/etc/glance/glance-registry.conf
-test -f $fileglanceregcontrol.orig || cp $fileglanceregcontrol $fileglanceregcontrol.orig
+test -f $fileglanceregcontrol.orig \
+    || cp $fileglanceregcontrol $fileglanceregcontrol.orig
 rm $fileglanceregcontrol
 touch $fileglanceregcontrol
 #Config file /etc/glance/glance-registry.conf

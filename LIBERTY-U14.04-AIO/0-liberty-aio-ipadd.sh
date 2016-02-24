@@ -1,4 +1,4 @@
-#!/bin/bash -ex 
+#!/bin/bash -ex
 
 source config.cfg
 
@@ -10,7 +10,7 @@ rm $ifaces
 cat << EOF > $ifaces
 #Configuring IP for Controller node
 
-# LOOPBACK NET 
+# LOOPBACK NET
 auto lo
 iface lo inet loopback
 

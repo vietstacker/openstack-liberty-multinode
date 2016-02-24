@@ -5,18 +5,18 @@ source config.cfg
 apt-get update -y && apt-get upgrade -y && apt-get dist-upgrade -y
 
 echo "########## Install and Config OpenvSwitch ##########"
-apt-get install -y openvswitch-switch 
+apt-get install -y openvswitch-switch
 
 apt-get install -y neutron-plugin-ml2 neutron-plugin-openvswitch-agent \
-  neutron-l3-agent neutron-dhcp-agent neutron-metadata-agent neutron-plugin-openvswitch neutron-common
-  
+    neutron-l3-agent neutron-dhcp-agent neutron-metadata-agent \
+    neutron-plugin-openvswitch neutron-common
 
-echo "########## Cau hinh br-int va br-ex cho OpenvSwitch ##########"
+echo "########## Configuring br-int and br-ex for OpenvSwitch ##########"
 sleep 5
 ovs-vsctl add-br br-ex
 ovs-vsctl add-port br-ex eth1
 
-echo "########## Cau hinh dia chi IP cho br-ex ##########"
+echo "########## Configuring IP for br-ex ##########"
 
 ifaces=/etc/network/interfaces
 test -f $ifaces.orig1 || cp $ifaces $ifaces.orig1
@@ -47,5 +47,5 @@ iface eth1 inet manual
  down ifconfig \$IFACE down
 EOF
 
-echo "##########  Khoi dong lai may sau khi cau hinh IP Address ##########"
+echo "########## Reboot machine after finishing configure IP ##########"
 init 6

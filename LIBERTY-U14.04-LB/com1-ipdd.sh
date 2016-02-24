@@ -37,7 +37,7 @@ touch $ifaces
 cat << EOF >> $ifaces
 #Dat IP cho $CON_MGNT_IP node
 
-# LOOPBACK NET 
+# LOOPBACK NET
 auto lo
 iface lo inet loopback
 

@@ -7,7 +7,7 @@ apt-get -y install python-openstackclient
 sleep 5
 
 echo "Install and config NTP"
-sleep 3 
+sleep 3
 apt-get install ntp -y
 cp /etc/ntp.conf /etc/ntp.conf.bka
 rm /etc/ntp.conf
@@ -46,9 +46,11 @@ echo "Finish setup pre-install package !!!"
 echo "##### Install MYSQL #####"
 sleep 3
 
-echo mysql-server mysql-server/root_password password $MYSQL_PASS | debconf-set-selections
-echo mysql-server mysql-server/root_password_again password $MYSQL_PASS | debconf-set-selections
-apt-get -y install mariadb-server python-mysqldb curl 
+echo mysql-server mysql-server/root_password password $MYSQL_PASS \
+    | debconf-set-selections
+echo mysql-server mysql-server/root_password_again password $MYSQL_PASS \
+    | debconf-set-selections
+apt-get -y install mariadb-server python-mysqldb curl
 
 echo "##### Configuring MYSQL #####"
 sleep 3

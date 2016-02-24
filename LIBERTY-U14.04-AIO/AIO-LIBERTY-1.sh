@@ -1,4 +1,4 @@
-#!/bin/bash -ex 
+#!/bin/bash -ex
 
 source config.cfg
 
@@ -14,7 +14,7 @@ test -f $iphost.orig || cp $iphost $iphost.orig
 rm $iphost
 touch $iphost
 cat << EOF >> $iphost
-127.0.0.1       localhost controller
+127.0.0.1   localhost controller
 $LOCAL_IP   controller
 
 EOF
@@ -36,7 +36,7 @@ apt-get -y update && apt-get -y upgrade && apt-get -y dist-upgrade
 
 
 echo "########## Install and Config OpenvSwitch ##########"
-apt-get install -y openvswitch-switch 
+apt-get install -y openvswitch-switch
 
 echo "########## Cau hinh br-int va br-ex cho OpenvSwitch ##########"
 sleep 5

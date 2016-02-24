@@ -13,12 +13,14 @@ GRANT ALL PRIVILEGES ON cinder.* TO 'cinder'@'%' IDENTIFIED BY '$CINDER_DBPASS';
 FLUSH PRIVILEGES;
 EOF
 
-echo "Create  user, endpoint for CINDER"
+echo "Create user, endpoint for CINDER"
 sleep 5
 openstack user create --password $ADMIN_PASS cinder
 openstack role add --project service --user cinder admin
-openstack service create --name cinder --description "OpenStack Block Storage" volume
-openstack service create --name cinderv2 --description "OpenStack Block Storage" volumev2
+openstack service create --name cinder --description \
+    "OpenStack Block Storage" volume
+openstack service create --name cinderv2 --description \
+    "OpenStack Block Storage" volumev2
 
 
 openstack endpoint create \
@@ -39,12 +41,14 @@ volumev2
 #
 echo "########## Install CINDER ##########"
 sleep 3
-apt-get install -y cinder-api cinder-scheduler python-cinderclient lvm2 cinder-volume python-mysqldb  qemu 
+apt-get install -y cinder-api cinder-scheduler python-cinderclient \
+    lvm2 cinder-volume python-mysqldb qemu
 
 
 pvcreate /dev/vdb
 vgcreate cinder-volumes /dev/vdb
-sed  -r -i 's#(filter = )(\[ "a/\.\*/" \])#\1["a\/vdb\/", "r/\.\*\/"]#g' /etc/lvm/lvm.conf
+sed -r -i 's#(filter = )(\[ "a/\.\*/" \])#\1["a\/vdb\/", "r/\.\*\/"]#g' \
+    /etc/lvm/lvm.conf
 
 filecinder=/etc/cinder/cinder.conf
 test -f $filecinder.orig || cp $filecinder $filecinder.orig
@@ -109,7 +113,7 @@ EOF
 echo "########## Syncing Cinder DB ##########"
 sleep 3
 su -s /bin/sh -c "cinder-manage db sync" cinder
- 
+
 echo "########## Restarting CINDER service ##########"
 sleep 3
 service tgt restart

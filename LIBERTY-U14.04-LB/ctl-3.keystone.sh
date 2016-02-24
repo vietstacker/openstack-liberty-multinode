@@ -12,16 +12,17 @@ FLUSH PRIVILEGES;
 EOF
 
 echo "##### Install keystone #####"
- 
-echo "manual" > /etc/init/keystone.override
- 
 
-apt-get -y install keystone python-openstackclient apache2 libapache2-mod-wsgi memcached python-memcache
- 
+echo "manual" > /etc/init/keystone.override
+
+
+apt-get -y install keystone python-openstackclient apache2 \
+    libapache2-mod-wsgi memcached python-memcache
+
 #/* Back-up file nova.conf
 filekeystone=/etc/keystone/keystone.conf
 test -f $filekeystone.orig || cp $filekeystone $filekeystone.orig
- 
+
 #Config file /etc/keystone/keystone.conf
 cat << EOF > $filekeystone
 
@@ -87,13 +88,12 @@ driver = memcache
 Distribution = Ubuntu
 
 EOF
- 
+
 #
 su -s /bin/sh -c "keystone-manage db_sync" keystone
- 
-echo "ServerName $CON_MGNT_IP" >>  /etc/apache2/apache2.conf
 
- 
+echo "ServerName $CON_MGNT_IP" >> /etc/apache2/apache2.conf
+
 cat << EOF > /etc/apache2/sites-available/wsgi-keystone.conf
 Listen 5000
 Listen 35357
@@ -144,11 +144,12 @@ Listen 35357
     </Directory>
 </VirtualHost>
 
- 
+
 EOF
- 
-ln -s /etc/apache2/sites-available/wsgi-keystone.conf /etc/apache2/sites-enabled
- 
+
+ln -s /etc/apache2/sites-available/wsgi-keystone.conf \
+    /etc/apache2/sites-enabled
+
 service apache2 restart
 
 rm -f /var/lib/keystone/keystone.db
@@ -156,14 +157,13 @@ rm -f /var/lib/keystone/keystone.db
 
 export OS_TOKEN="$TOKEN_PASS"
 export OS_URL=http://$CON_MGNT_IP:35357/v2.0
- 
- 
+
 # export OS_SERVICE_TOKEN="$TOKEN_PASS"
 # export OS_SERVICE_ENDPOINT="http://$CON_MGNT_IP:35357/v2.0"
 # export SERVICE_ENDPOINT="http://$CON_MGNT_IP:35357/v2.0"
- 
-###  Identity service
-openstack service create --name keystone --description "OpenStack Identity" identity
+### Identity service
+openstack service create --name keystone --description \
+    "OpenStack Identity" identity
 ### Create the Identity service API endpoint
 openstack endpoint create \
 --publicurl http://$CON_MGNT_IP:5000/v2.0 \
@@ -171,45 +171,44 @@ openstack endpoint create \
 --adminurl http://$CON_MGNT_IP:35357/v2.0 \
 --region RegionOne \
 identity
- 
+
 #### To create tenants, users, and roles ADMIN
 openstack project create --description "Admin Project" admin
-openstack user create --password  $ADMIN_PASS admin
+openstack user create --password $ADMIN_PASS admin
 openstack role create admin
 openstack role add --project admin --user admin admin
- 
-#### To create tenants, users, and roles  SERVICE
+
+#### To create tenants, users, and roles SERVICE
 openstack project create --description "Service Project" service
- 
- 
-#### To create tenants, users, and roles  DEMO
+
+#### To create tenants, users, and roles DEMO
 openstack project create --description "Demo Project" demo
 openstack user create --password $ADMIN_PASS demo
- 
+
 ### Create the user role
 openstack role create user
 openstack role add --project demo --user demo user
- 
+
 #################
- 
+
 unset OS_TOKEN OS_URL
- 
+
 # Tao bien moi truong
- 
+
 echo "export OS_PROJECT_DOMAIN_ID=default" > admin-openrc.sh
 echo "export OS_USER_DOMAIN_ID=default" >> admin-openrc.sh
 echo "export OS_PROJECT_NAME=admin" >> admin-openrc.sh
 echo "export OS_TENANT_NAME=admin" >> admin-openrc.sh
 echo "export OS_USERNAME=admin" >> admin-openrc.sh
-echo "export OS_PASSWORD=$ADMIN_PASS"  >> admin-openrc.sh
+echo "export OS_PASSWORD=$ADMIN_PASS" >> admin-openrc.sh
 echo "export OS_AUTH_URL=http://$CON_MGNT_IP:35357/v3" >> admin-openrc.sh
-echo "export OS_VOLUME_API_VERSION=2"   >> admin-openrc.sh
+echo "export OS_VOLUME_API_VERSION=2" >> admin-openrc.sh
 
 sleep 5
 echo "########## Execute environment script ##########"
 chmod +x admin-openrc.sh
-cat  admin-openrc.sh >> /etc/profile
-cp  admin-openrc.sh /root/admin-openrc.sh
+cat admin-openrc.sh >> /etc/profile
+cp admin-openrc.sh /root/admin-openrc.sh
 source admin-openrc.sh
 
 
@@ -223,4 +222,4 @@ echo "export OS_AUTH_URL=http://$CON_MGNT_IP:35357/v3" >> demo-openrc.sh
 echo "export OS_VOLUME_API_VERSION=2"  >> demo-openrc.sh
 
 chmod +x demo-openrc.sh
-cp  demo-openrc.sh /root/demo-openrc.sh
+cp demo-openrc.sh /root/demo-openrc.sh

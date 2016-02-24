@@ -9,7 +9,7 @@ touch $ifaces
 cat << EOF >> $ifaces
 #Assign IP for Controller node
 
-# LOOPBACK NET 
+# LOOPBACK NET
 auto lo
 iface lo inet loopback
 

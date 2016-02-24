@@ -11,7 +11,7 @@ FLUSH PRIVILEGES;
 EOF
 
 
-echo "Creat user, endpoint for NOVA"
+echo "Create user, endpoint for NOVA"
 
 openstack user create --password $ADMIN_PASS nova
 openstack role add --project service --user nova admin
@@ -26,11 +26,11 @@ compute
 
 
 echo "########## Install NOVA in $CON_MGNT_IP ##########"
-sleep 5 
-apt-get -y install nova-api nova-cert nova-conductor nova-consoleauth nova-novncproxy nova-scheduler python-novaclient
+sleep 5
+apt-get -y install nova-api nova-cert nova-conductor nova-consoleauth \
+    nova-novncproxy nova-scheduler python-novaclient
 
-# Cai tu dong libguestfs-tools 
-# echo "libguestfs-tools        libguestfs/update-appliance     boolean true"  | debconf-set-selections
+# Cai tu dong libguestfs-tools
 apt-get -y install libguestfs-tools sysfsutils guestfsd python-guestfs
 
 ######## Backup configurations for NOVA ##########"
@@ -120,15 +120,13 @@ sleep 7
 rm /var/lib/nova/nova.sqlite
 
 echo "########## Syncing Nova DB ##########"
-sleep 7 
+sleep 7
 su -s /bin/sh -c "nova-manage db sync" nova
 
-
-# fix bug libvirtError: internal error: no supported architecture for os type 'hvm'
 # echo 'kvm_intel' >> /etc/modules
 
 echo "########## Restarting NOVA ... ##########"
-sleep 7 
+sleep 7
 service nova-api restart
 service nova-cert restart
 service nova-consoleauth restart
@@ -136,7 +134,7 @@ service nova-scheduler restart
 service nova-conductor restart
 service nova-novncproxy restart
 
-sleep 7 
+sleep 7
 echo "########## Restarting NOVA ... ##########"
 service nova-api restart
 service nova-cert restart
